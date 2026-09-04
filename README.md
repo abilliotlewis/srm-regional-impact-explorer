@@ -8,17 +8,17 @@ The first scientific question is:
 
 ## Current status
 
-Phase 1 now has a reproducible, model-derived result from official ESGF-hosted data. The first comparison uses monthly `tasmax` from IPSL-CM6A-LR for 2071–2100. Raw NetCDF files and the generated analysis table stay outside Git, while the exact source URLs, versions, byte counts, and SHA-256 checksums are versioned in the repository.
+The project now has a reproducible two-model checkpoint from official ESGF-hosted data. The comparison uses monthly `tasmax` from IPSL-CM6A-LR and MPI-ESM1-2-LR for 2071–2100. Raw NetCDF files and the generated analysis table stay outside Git, while exact source URLs, versions, byte counts, SHA-256 checksums, licenses, and parent-run metadata are versioned in the repository.
 
 The repository retains a deterministic synthetic-data generator for interface tests. The app clearly identifies whether its active records are synthetic or model-derived.
 
-## First result
+## Current result
 
-For the IPSL-CM6A-LR `r1i1p1f1` realization, the 2071–2100 JJA area-weighted box-mean `tasmax` difference from SSP5-8.5 is -2.24 °C under G6solar and -1.90 °C under G6sulfur. This one-model result is a pipeline milestone, not a robust multi-model conclusion.
+For the two-model mean, the 2071–2100 JJA area-weighted box-mean `tasmax` difference from SSP5-8.5 is -2.09 °C under G6solar and -1.72 °C under G6sulfur. Both models show stronger JJA cooling under G6solar. This remains a checkpoint, not a robust ensemble conclusion.
 
-![G6solar and G6sulfur JJA tasmax differences from SSP5-8.5](docs/phase1_tasmax_jja.png)
+![Two-model regional tasmax comparison](docs/phase2_tasmax_regional.png)
 
-See [the Phase 1 result note](docs/PHASE1_RESULT.md) for method, provenance, and limitations.
+See [the Phase 2 checkpoint](docs/PHASE2_CHECKPOINT.md) for results and limitations. The [Phase 1 result note](docs/PHASE1_RESULT.md) preserves the initial single-model milestone.
 
 ## Scenarios
 
@@ -51,11 +51,11 @@ pytest
 
 ## Replace the demonstration data
 
-The first real-data manifest contains matched monthly `tasmax` files for IPSL-CM6A-LR. Download, verify, and process them with:
+The real-data manifests contain matched monthly `tasmax` files for IPSL-CM6A-LR and MPI-ESM1-2-LR. Download, verify, and process them with:
 
 ```bash
 python scripts/build_phase1.py --download
-python scripts/make_phase1_figure.py
+python scripts/make_multimodel_figure.py
 ```
 
 The downloader validates every file against its official ESGF byte count and SHA-256 checksum before the analysis begins. Raw NetCDF and derived CSV files remain untracked by Git.
@@ -79,10 +79,12 @@ scripts/generate_demo_data.py Deterministic demonstration data generator
 scripts/prepare_geomip.py     NetCDF-to-explorer preprocessing starter
 scripts/download_manifest.py  Checksum-verifying ESGF downloader
 scripts/build_phase1.py        First IPSL real-data build
+scripts/make_multimodel_figure.py  Native-grid regional comparison figure
 data/manifests/                Versioned source records and checksums
 data/processed/               Generated or explorer-ready tables
 docs/DATA_PLAN.md             Real-data acquisition and validation plan
 docs/PHASE1_RESULT.md         First result, method, and limitations
+docs/PHASE2_CHECKPOINT.md      Two-model checkpoint and limitations
 tests/                         Automated checks
 ```
 

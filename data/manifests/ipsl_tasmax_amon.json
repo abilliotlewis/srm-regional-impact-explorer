@@ -5,7 +5,10 @@
   "source_id": "IPSL-CM6A-LR",
   "variable_id": "tasmax",
   "table_id": "Amon",
-  "license": "CC BY 4.0",
+  "license": "CC BY-NC-SA 4.0",
+  "license_source": "NetCDF global attribute",
+  "parent_experiment_id": "ssp585",
+  "parent_variant_label": "r1i1p1f1",
   "analysis_period": "2071-2100",
   "records": [
     {
@@ -62,4 +65,3 @@
     }
   ]
 }
-

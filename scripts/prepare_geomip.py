@@ -8,6 +8,7 @@ equivalent CF-aware workflow before being passed to this script.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
 from pathlib import Path
 
 import pandas as pd
@@ -38,7 +39,7 @@ def convert_units(data: xr.DataArray, variable: str) -> tuple[xr.DataArray, str]
 
 
 def prepare(
-    source: Path,
+    source: Path | Sequence[Path],
     scenario: str,
     model: str,
     variable: str,
@@ -46,7 +47,14 @@ def prepare(
     start_year: int,
     end_year: int,
 ) -> pd.DataFrame:
-    dataset = xr.open_mfdataset(str(source), combine="by_coords")
+    sources = [str(path) for path in source] if isinstance(source, Sequence) else str(source)
+    dataset = xr.open_mfdataset(
+        sources,
+        combine="by_coords",
+        data_vars="minimal",
+        coords="minimal",
+        compat="override",
+    )
     data = normalize_longitude(dataset[variable])
     data = data.sel(time=slice(str(start_year), str(end_year)), lat=slice(24, 38), lon=slice(-100, -74))
     data, units = convert_units(data, variable)

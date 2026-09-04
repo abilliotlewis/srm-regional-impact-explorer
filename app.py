@@ -15,6 +15,7 @@ if not DATA_PATH.exists():
     DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
     build_demo_data().to_csv(DATA_PATH, index=False)
 DATA = load_metrics(DATA_PATH)
+MODELS = sorted(DATA["model"].unique().tolist())
 SCENARIOS = sorted(DATA["scenario"].unique().tolist())
 METRICS = sorted(DATA["metric"].unique().tolist())
 SEASONS = [s for s in ["ANN", "DJF", "MAM", "JJA", "SON"] if s in set(DATA["season"])]
@@ -28,9 +29,10 @@ INITIAL_PROVENANCE = (
 )
 
 
-def update(scenario: str, metric: str, season: str, mode: str):
-    figure = make_map(DATA, scenario, metric, season, mode)
-    summary, provenance = summarize_region(DATA, scenario, metric, season, mode)
+def update(model: str, scenario: str, metric: str, season: str, mode: str):
+    selected = DATA[DATA["model"] == model]
+    figure = make_map(selected, scenario, metric, season, mode)
+    summary, provenance = summarize_region(selected, scenario, metric, season, mode)
     return figure, summary, provenance
 
 
@@ -42,6 +44,7 @@ with gr.Blocks(title="SRM Regional Impact Explorer") as demo:
     )
     provenance = gr.Markdown(INITIAL_PROVENANCE)
     with gr.Row():
+        model = gr.Dropdown(MODELS, value=MODELS[0], label="Model")
         scenario = gr.Dropdown(
             SCENARIOS, value=DEFAULT_SCENARIO, label="Scenario"
         )
@@ -57,8 +60,9 @@ with gr.Blocks(title="SRM Regional Impact Explorer") as demo:
     run = gr.Button("Update analysis", variant="primary")
     plot = gr.Plot(label="Regional pattern")
     summary = gr.Dataframe(headers=["Statistic", "Value"], interactive=False, label="Regional summary")
-    run.click(update, [scenario, metric, season, mode], [plot, summary, provenance])
-    demo.load(update, [scenario, metric, season, mode], [plot, summary, provenance])
+    inputs = [model, scenario, metric, season, mode]
+    run.click(update, inputs, [plot, summary, provenance])
+    demo.load(update, inputs, [plot, summary, provenance])
     gr.Markdown(
         "G6solar represents reduced solar irradiance in a climate-model experiment. "
         "It is not a complete engineering simulation of satellite mirrors."

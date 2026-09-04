@@ -1,6 +1,6 @@
 ---
 pretty_name: SRM Regional Impact Explorer Data
-license: cc-by-4.0
+license: other
 task_categories:
   - tabular-regression
 tags:
@@ -16,7 +16,9 @@ This repository defines a reproducible workflow for regional climatologies deriv
 
 ## Current release status
 
-The first model-derived build covers monthly `tasmax` from IPSL-CM6A-LR realization `r1i1p1f1` for G6solar, G6sulfur, SSP5-8.5, and SSP2-4.5 during 2071–2100. The derived CSV is generated locally and is not committed to Git. Exact source records and checksums are stored in `data/manifests/ipsl_tasmax_amon.json`.
+The current model-derived build covers monthly `tasmax` from IPSL-CM6A-LR `r1i1p1f1` and MPI-ESM1-2-LR `r2i1p1f1` for G6solar, G6sulfur, SSP5-8.5, and SSP2-4.5 during 2071–2100. The derived CSV is generated locally and is not committed to Git. Exact source records and checksums are stored under `data/manifests/`.
+
+Source licenses differ by institution. IPSL files state CC BY-NC-SA 4.0; MPI-M files state CC BY-SA 4.0. Consult each manifest and the NetCDF global attributes before redistribution.
 
 Records generated from `scripts/generate_demo_data.py` have `is_demo=true` and `period=DEMONSTRATION ONLY`. They are not observational or modeled climate data.
 

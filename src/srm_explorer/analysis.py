@@ -109,6 +109,36 @@ def difference_grid(
     )
 
 
+def regional_model_means(values: pd.DataFrame) -> pd.DataFrame:
+    """Return cosine-latitude-weighted means without mixing model grids."""
+    weighted = values.assign(weight=np.cos(np.deg2rad(values["lat"])))
+    weighted["weighted_value"] = weighted["value"] * weighted["weight"]
+    totals = weighted.groupby("model", as_index=False).agg(
+        weighted_value=("weighted_value", "sum"), weight=("weight", "sum")
+    )
+    totals["value"] = totals["weighted_value"] / totals["weight"]
+    return totals[["model", "value"]]
+
+
+def regional_differences(
+    frame: pd.DataFrame,
+    scenario: str,
+    metric: str,
+    season: str,
+    reference: str = "ssp585",
+) -> pd.DataFrame:
+    """Return one regional difference per model on each model's native grid."""
+    target = _selection(frame, scenario, metric, season)
+    baseline = _selection(frame, reference, metric, season)[
+        ["model", "lat", "lon", "value"]
+    ].rename(columns={"value": "reference_value"})
+    matched = target.merge(
+        baseline, on=["model", "lat", "lon"], validate="one_to_one"
+    )
+    matched["value"] = matched["value"] - matched["reference_value"]
+    return regional_model_means(matched)
+
+
 def make_map(
     frame: pd.DataFrame,
     scenario: str,
@@ -160,15 +190,6 @@ def summarize_region(
 ) -> tuple[pd.DataFrame, str]:
     selected = _selection(frame, scenario, metric, season)
 
-    def weighted_model_means(values: pd.DataFrame) -> pd.DataFrame:
-        weighted = values.assign(weight=np.cos(np.deg2rad(values["lat"])))
-        weighted["weighted_value"] = weighted["value"] * weighted["weight"]
-        totals = weighted.groupby("model", as_index=False).agg(
-            weighted_value=("weighted_value", "sum"), weight=("weight", "sum")
-        )
-        totals["value"] = totals["weighted_value"] / totals["weight"]
-        return totals[["model", "value"]]
-
     if mode == "Difference from SSP5-8.5" and scenario != "ssp585":
         baseline = _selection(frame, "ssp585", metric, season)[
             ["model", "lat", "lon", "value"]
@@ -177,11 +198,11 @@ def summarize_region(
             baseline, on=["model", "lat", "lon"], validate="one_to_one"
         )
         matched["value"] = matched["value"] - matched["reference_value"]
-        per_model = weighted_model_means(matched)
+        per_model = regional_model_means(matched)
         statistic_label = "Regional mean difference"
         model_label = "Matched models"
     else:
-        per_model = weighted_model_means(selected)
+        per_model = regional_model_means(selected)
         statistic_label = "Regional mean"
         model_label = "Models"
     units = selected["units"].iloc[0]

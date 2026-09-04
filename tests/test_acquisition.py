@@ -22,6 +22,20 @@ def test_phase1_manifest_is_complete():
     assert all(len(record["sha256"]) == 64 for record in manifest["records"])
 
 
+def test_mpi_manifest_covers_analysis_period():
+    path = ROOT / "data" / "manifests" / "mpi_lr_tasmax_amon.json"
+    manifest = load_manifest(path)
+    assert {record["experiment_id"] for record in manifest["records"]} == {
+        "G6solar",
+        "G6sulfur",
+        "ssp585",
+        "ssp245",
+    }
+    assert len(manifest["records"]) == 12
+    assert all(record["variant_label"] == "r2i1p1f1" for record in manifest["records"])
+    assert all(record["filename"].endswith(".nc") for record in manifest["records"])
+
+
 def test_checksum_validation(tmp_path):
     path = tmp_path / "sample.bin"
     content = b"verified climate data"
@@ -43,4 +57,3 @@ def test_manifest_rejects_incomplete_records(tmp_path):
         assert "missing" in str(error).lower()
     else:
         raise AssertionError("Expected incomplete-manifest validation error")
-

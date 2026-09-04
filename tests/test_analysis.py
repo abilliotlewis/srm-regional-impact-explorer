@@ -11,7 +11,12 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from generate_demo_data import build
 from prepare_geomip import prepare
-from srm_explorer.analysis import difference_grid, load_metrics, summarize_region
+from srm_explorer.analysis import (
+    difference_grid,
+    load_metrics,
+    regional_differences,
+    summarize_region,
+)
 
 
 def test_demo_schema_round_trip(tmp_path):
@@ -44,6 +49,12 @@ def test_difference_summary_matches_map_direction():
         summary.Statistic == "Regional mean difference", "Value"
     ].iloc[0]
     assert float(mean_text.split()[0]) < 0
+
+
+def test_regional_differences_preserve_models():
+    result = regional_differences(build(), "G6solar", "tasmax_mean", "JJA")
+    assert result.model.nunique() == 3
+    assert (result.value < 0).all()
 
 
 def test_loader_rejects_missing_column(tmp_path):

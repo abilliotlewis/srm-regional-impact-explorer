@@ -1,0 +1,8 @@
+__pycache__/
+.pytest_cache/
+.venv/
+data/raw/
+data/processed/regional_metrics.csv
+docs/demo_preview.png
+*.nc
+*.zarr/

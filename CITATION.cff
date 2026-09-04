@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software or its results, please cite it using the metadata below."
+title: "SRM Regional Impact Explorer"
+type: software
+authors:
+  - family-names: "Lewis"
+    given-names: "Amanda"
+repository-code: "https://github.com/abilliotlewis/srm-regional-impact-explorer"
+url: "https://github.com/abilliotlewis/srm-regional-impact-explorer"
+license: MIT
+version: "0.2.0"
+date-released: "2026-09-04"
+keywords:
+  - solar radiation modification
+  - solar geoengineering
+  - GeoMIP
+  - CMIP6
+  - regional climate
+  - climate risk
+  - climate modeling
+abstract: >
+  An open, reproducible research software project for comparing regional
+  climate responses under solar radiation modification scenarios, with
+  an initial focus on G6solar and G6sulfur impacts over the Southeast
+  United States.

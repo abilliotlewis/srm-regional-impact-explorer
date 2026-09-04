@@ -10,7 +10,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from generate_demo_data import build
-from prepare_geomip import prepare
+from prepare_geomip import convert_units, prepare
 from srm_explorer.analysis import (
     difference_grid,
     ensemble_statistics,
@@ -87,6 +87,29 @@ def test_monthly_netcdf_preparation(tmp_path):
     assert not frame.is_demo.any()
 
 
+def test_precipitation_flux_converts_to_mm_per_day(tmp_path):
+    times = pd.date_range("2071-01-01", periods=24, freq="MS")
+    source = tmp_path / "pr.nc"
+    values = np.full((24, 1, 1), 1.0e-5)
+    xr.Dataset(
+        {"pr": (("time", "lat", "lon"), values, {"units": "kg m-2 s-1"})},
+        coords={"time": times, "lat": [30.0], "lon": [-85.0]},
+    ).to_netcdf(source, engine="h5netcdf")
+    frame = prepare(source, "G6solar", "TEST", "pr", "pr_mean", 2071, 2072)
+    assert set(frame.units) == {"mm/day"}
+    assert np.allclose(frame.value, 0.864)
+
+
+def test_unsupported_precipitation_units_are_rejected():
+    data = xr.DataArray([1.0], attrs={"units": "inches fortnight-1"})
+    try:
+        convert_units(data, "pr")
+    except ValueError as error:
+        assert "Unsupported pr units" in str(error)
+    else:
+        raise AssertionError("Expected unsupported-unit validation error")
+
+
 def test_djf_uses_complete_cross_year_season_and_day_weights(tmp_path):
     times = pd.date_range("2071-01-01", periods=24, freq="MS")
     values = np.full((24, 1, 1), 273.15)
@@ -152,3 +175,20 @@ def test_phase3_ensemble_counts_and_intervention_difference():
     assert 0 <= summary.sign_agreement.iloc[0] <= 1
     comparison = intervention_differences(frame, "tasmax_mean", "JJA")
     assert comparison.model.nunique() == 3
+
+
+def test_phase4_published_summary_has_complete_four_model_counts():
+    summary = pd.read_csv(ROOT / "docs" / "phase4_ensemble_summary.csv")
+    assert len(summary) == 15
+    assert set(summary.model_count) == {4}
+    assert set(summary.season) == {"ANN", "DJF", "MAM", "JJA", "SON"}
+    assert set(summary.comparison) == {
+        "G6solar - SSP5-8.5",
+        "G6sulfur - SSP5-8.5",
+        "G6solar - G6sulfur",
+    }
+    jja_sulfur = summary[
+        (summary.season == "JJA")
+        & (summary.comparison == "G6sulfur - SSP5-8.5")
+    ].iloc[0]
+    assert jja_sulfur.sign_agreement == 0.5

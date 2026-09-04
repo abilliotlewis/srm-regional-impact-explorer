@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+  "created_utc": "2026-09-04",
+  "project": "CMIP6",
+  "source_id": "CNRM-ESM2-1",
+  "variable_id": "pr",
+  "table_id": "Amon",
+  "license": "CC BY-NC-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+  "license_source": "NetCDF global attribute",
+  "analysis_period": "2071-2100",
+  "selection_note": "Same r1i1p1f2 gr matched-sibling experiment set used for Phase 3 tasmax.",
+  "experiments": {
+    "G6solar": {"parent_experiment_id": "historical", "parent_variant_label": "r1i1p1f2"},
+    "G6sulfur": {"parent_experiment_id": "historical", "parent_variant_label": "r1i1p1f2"},
+    "ssp585": {"parent_experiment_id": "historical", "parent_variant_label": "r1i1p1f2"}
+  },
+  "records": [
+    {
+      "dataset_key": "CNRM-ESM2-1.G6solar.r1i1p1f2.Amon.pr.gr.v20200520",
+      "activity_id": "GeoMIP", "experiment_id": "G6solar", "institution_id": "CNRM-CERFACS", "variant_label": "r1i1p1f2", "grid_label": "gr", "version": "v20200520",
+      "filename": "pr_Amon_CNRM-ESM2-1_G6solar_r1i1p1f2_gr_201501-210012.nc", "size_bytes": 105336501, "sha256": "114517bdfedc34d8156f66f9eeece0cf54b55a4c37c78bb8ac6a31d8c9ff88de", "tracking_id": "hdl:21.14100/13cac69b-852d-460a-bc96-808cc6f470ef",
+      "url": "https://dap.ceda.ac.uk/badc/cmip6/data/CMIP6/GeoMIP/CNRM-CERFACS/CNRM-ESM2-1/G6solar/r1i1p1f2/Amon/pr/gr/files/d20200520/pr_Amon_CNRM-ESM2-1_G6solar_r1i1p1f2_gr_201501-210012.nc?download=1"
+    },
+    {
+      "dataset_key": "CNRM-ESM2-1.G6sulfur.r1i1p1f2.Amon.pr.gr.v20190711",
+      "activity_id": "GeoMIP", "experiment_id": "G6sulfur", "institution_id": "CNRM-CERFACS", "variant_label": "r1i1p1f2", "grid_label": "gr", "version": "v20190711",
+      "filename": "pr_Amon_CNRM-ESM2-1_G6sulfur_r1i1p1f2_gr_201501-210012.nc", "size_bytes": 105344383, "sha256": "45a1344f8195e9201a4faf4085af362a9efc0fb289e195365f7693e986155c73", "tracking_id": "hdl:21.14100/dbebd757-426a-4521-aa93-b434ccc79085",
+      "url": "https://dap.ceda.ac.uk/badc/cmip6/data/CMIP6/GeoMIP/CNRM-CERFACS/CNRM-ESM2-1/G6sulfur/r1i1p1f2/Amon/pr/gr/files/d20190711/pr_Amon_CNRM-ESM2-1_G6sulfur_r1i1p1f2_gr_201501-210012.nc?download=1"
+    },
+    {
+      "dataset_key": "CNRM-ESM2-1.ssp585.r1i1p1f2.Amon.pr.gr.v20191021",
+      "activity_id": "ScenarioMIP", "experiment_id": "ssp585", "institution_id": "CNRM-CERFACS", "variant_label": "r1i1p1f2", "grid_label": "gr", "version": "v20191021",
+      "filename": "pr_Amon_CNRM-ESM2-1_ssp585_r1i1p1f2_gr_201501-210012.nc", "size_bytes": 105344136, "sha256": "b1ce0c547a9274e511bd32693fef2c9c0d943acdf6b2ef0ae16261ca6c3b7260", "tracking_id": "hdl:21.14100/06163639-7f59-4229-bfde-3de93034b961",
+      "url": "https://dap.ceda.ac.uk/badc/cmip6/data/CMIP6/ScenarioMIP/CNRM-CERFACS/CNRM-ESM2-1/ssp585/r1i1p1f2/Amon/pr/gr/files/d20191021/pr_Amon_CNRM-ESM2-1_ssp585_r1i1p1f2_gr_201501-210012.nc?download=1"
+    }
+  ]
+}

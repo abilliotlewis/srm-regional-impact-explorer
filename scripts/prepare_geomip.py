@@ -31,11 +31,20 @@ def normalize_longitude(data: xr.DataArray) -> xr.DataArray:
 
 def convert_units(data: xr.DataArray, variable: str) -> tuple[xr.DataArray, str]:
     units = str(data.attrs.get("units", "unknown"))
-    if variable in {"tas", "tasmax"} and units.lower() in {"k", "kelvin"}:
-        return data - 273.15, "degC"
-    if variable == "pr" and units in {"kg m-2 s-1", "kg m**-2 s**-1"}:
-        return data * 86400.0, "mm/day"
-    return data, units
+    if variable in {"tas", "tasmax"}:
+        if units.lower() in {"k", "kelvin"}:
+            return data - 273.15, "degC"
+        if units.lower() in {"degc", "degree_celsius", "degrees_celsius"}:
+            return data, "degC"
+        raise ValueError(f"Unsupported {variable} units: {units!r}")
+    if variable == "pr":
+        normalized = " ".join(units.replace("**", "").split()).lower()
+        if normalized in {"kg m-2 s-1", "kg/m2/s", "mm s-1"}:
+            return data * 86400.0, "mm/day"
+        if normalized in {"mm/day", "mm d-1"}:
+            return data, "mm/day"
+        raise ValueError(f"Unsupported pr units: {units!r}")
+    raise ValueError(f"Unsupported variable: {variable!r}")
 
 
 def validate_monthly_coverage(data: xr.DataArray, start_year: int, end_year: int) -> None:

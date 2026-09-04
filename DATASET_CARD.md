@@ -16,7 +16,7 @@ This repository defines a reproducible workflow for regional climatologies deriv
 
 ## Current release status
 
-The Phase 3 model-derived build covers monthly `tasmax` from CNRM-ESM2-1 `r1i1p1f2`, IPSL-CM6A-LR `r1i1p1f1`, MPI-ESM1-2-LR `r2i1p1f1`, and UKESM1-0-LL `r1i1p1f2` for G6solar, G6sulfur, and SSP5-8.5 during 2071–2100. The gridded derived CSV is generated locally and is not committed to Git. Compact per-model and ensemble regional tables are versioned under `docs/`. Exact source records and checksums are stored under `data/manifests/`.
+The Phase 4 model-derived build covers monthly `tasmax` and precipitation (`pr`) from CNRM-ESM2-1 `r1i1p1f2`, IPSL-CM6A-LR `r1i1p1f1`, MPI-ESM1-2-LR `r2i1p1f1`, and UKESM1-0-LL `r1i1p1f2` for G6solar, G6sulfur, and SSP5-8.5 during 2071–2100. The same model, member, and grid sample is used for both variables. The gridded derived CSV is generated locally and is not committed to Git. Compact per-model and ensemble regional tables are versioned under `docs/`. Exact source records and checksums are stored under `data/manifests/`.
 
 Source licenses differ by institution. CNRM-CERFACS and IPSL files state CC BY-NC-SA 4.0; MPI-M and MOHC files state CC BY-SA 4.0. Consult each manifest and the NetCDF global attributes before redistribution.
 

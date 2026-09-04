@@ -10,7 +10,8 @@ import xarray as xr
 from download_manifest import download_record, load_manifest, validate_file
 from prepare_geomip import prepare
 
-PHASE3_EXPERIMENTS = {"G6solar", "G6sulfur", "ssp585"}
+REQUIRED_EXPERIMENTS = {"G6solar", "G6sulfur", "ssp585"}
+VARIABLE_METRICS = {"tasmax": "tasmax_mean", "pr": "pr_mean"}
 
 
 def experiment_metadata(manifest: dict, experiment_id: str) -> dict:
@@ -25,14 +26,14 @@ def validate_matched_experiments(manifest: dict) -> None:
     """Reject missing, mixed, or parent-incompatible direct comparisons."""
     records = manifest["records"]
     available = {record["experiment_id"] for record in records}
-    missing = PHASE3_EXPERIMENTS.difference(available)
+    missing = REQUIRED_EXPERIMENTS.difference(available)
     if missing:
         raise ValueError(
             f"{manifest['source_id']} is missing required experiments {sorted(missing)}"
         )
 
     identities = {}
-    for experiment_id in PHASE3_EXPERIMENTS:
+    for experiment_id in REQUIRED_EXPERIMENTS:
         selected = [r for r in records if r["experiment_id"] == experiment_id]
         variants = {r["variant_label"] for r in selected}
         grids = {r["grid_label"] for r in selected}
@@ -102,14 +103,17 @@ def validate_provenance(
                     )
 
 
-def build(manifest_paths: list[Path], raw_dir: Path, output: Path, download: bool) -> None:
+def build_frame(
+    manifest_paths: list[Path], raw_dir: Path, download: bool = False
+) -> pd.DataFrame:
+    """Build one validated variable table from matched model manifests."""
     frames = []
     for manifest_path in manifest_paths:
         manifest = load_manifest(manifest_path)
         validate_matched_experiments(manifest)
         grouped: dict[str, list[dict]] = defaultdict(list)
         for record in manifest["records"]:
-            if record["experiment_id"] in PHASE3_EXPERIMENTS:
+            if record["experiment_id"] in REQUIRED_EXPERIMENTS:
                 grouped[record["experiment_id"]].append(record)
 
         for experiment_id, records in grouped.items():
@@ -126,12 +130,15 @@ def build(manifest_paths: list[Path], raw_dir: Path, output: Path, download: boo
                 sources.append(source)
             validate_provenance(sources, records, manifest, experiment_id)
             metadata = experiment_metadata(manifest, experiment_id)
+            variable = manifest["variable_id"]
+            if variable not in VARIABLE_METRICS:
+                raise ValueError(f"No explorer metric is defined for variable {variable!r}")
             frame = prepare(
                 source=sources,
                 scenario=experiment_id,
                 model=manifest["source_id"],
-                variable=manifest["variable_id"],
-                metric="tasmax_mean",
+                variable=variable,
+                metric=VARIABLE_METRICS[variable],
                 start_year=2071,
                 end_year=2100,
                 variant_label=records[0]["variant_label"],
@@ -145,7 +152,11 @@ def build(manifest_paths: list[Path], raw_dir: Path, output: Path, download: boo
             )
             frame["dataset_key"] = records[0]["dataset_key"]
             frames.append(frame)
-    combined = pd.concat(frames, ignore_index=True)
+    return pd.concat(frames, ignore_index=True)
+
+
+def build(manifest_paths: list[Path], raw_dir: Path, output: Path, download: bool) -> None:
+    combined = build_frame(manifest_paths, raw_dir, download)
     output.parent.mkdir(parents=True, exist_ok=True)
     combined.to_csv(output, index=False)
     print(f"Wrote {len(combined):,} verified model-derived records to {output}")

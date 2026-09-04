@@ -1,0 +1,65 @@
+{
+  "manifest_version": 2,
+  "created_utc": "2026-09-04",
+  "project": "CMIP6",
+  "source_id": "MPI-ESM1-2-LR",
+  "variable_id": "pr",
+  "table_id": "Amon",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "license_source": "NetCDF global attribute",
+  "analysis_period": "2071-2100",
+  "selection_note": "Same r2i1p1f1 gn direct-parent experiment set used for Phase 3 tasmax. Only files overlapping 2071-2100 are listed.",
+  "experiments": {
+    "G6solar": {"parent_experiment_id": "ssp585", "parent_variant_label": "r2i1p1f1"},
+    "G6sulfur": {"parent_experiment_id": "ssp585", "parent_variant_label": "r2i1p1f1"},
+    "ssp585": {"parent_experiment_id": "historical", "parent_variant_label": "r2i1p1f1"}
+  },
+  "records": [
+    {
+      "dataset_key": "MPI-ESM1-2-LR.G6solar.r2i1p1f1.Amon.pr.gn.v20190710", "activity_id": "GeoMIP", "experiment_id": "G6solar", "institution_id": "MPI-M", "variant_label": "r2i1p1f1", "grid_label": "gn", "version": "v20190710",
+      "filename": "pr_Amon_MPI-ESM1-2-LR_G6solar_r2i1p1f1_gn_205501-207412.nc", "size_bytes": 13276952, "sha256": "a0c896f07dbd1a5e3999168c9b88db72311534502ba37c7bcc883378a8a1f016", "tracking_id": "hdl:21.14100/7cc766dd-74fd-4e78-8536-7adfbcaf0e53",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/GeoMIP/MPI-M/MPI-ESM1-2-LR/G6solar/r2i1p1f1/Amon/pr/gn/v20190710/pr_Amon_MPI-ESM1-2-LR_G6solar_r2i1p1f1_gn_205501-207412.nc"
+    },
+    {
+      "dataset_key": "MPI-ESM1-2-LR.G6solar.r2i1p1f1.Amon.pr.gn.v20190710", "activity_id": "GeoMIP", "experiment_id": "G6solar", "institution_id": "MPI-M", "variant_label": "r2i1p1f1", "grid_label": "gn", "version": "v20190710",
+      "filename": "pr_Amon_MPI-ESM1-2-LR_G6solar_r2i1p1f1_gn_207501-209412.nc", "size_bytes": 13281812, "sha256": "451761806c0f46b9d0317ead0d3f96e74856440ff05f3196712ff74400111f8b", "tracking_id": "hdl:21.14100/58123281-6fea-4f07-aa82-ef83410bf235",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/GeoMIP/MPI-M/MPI-ESM1-2-LR/G6solar/r2i1p1f1/Amon/pr/gn/v20190710/pr_Amon_MPI-ESM1-2-LR_G6solar_r2i1p1f1_gn_207501-209412.nc"
+    },
+    {
+      "dataset_key": "MPI-ESM1-2-LR.G6solar.r2i1p1f1.Amon.pr.gn.v20190710", "activity_id": "GeoMIP", "experiment_id": "G6solar", "institution_id": "MPI-M", "variant_label": "r2i1p1f1", "grid_label": "gn", "version": "v20190710",
+      "filename": "pr_Amon_MPI-ESM1-2-LR_G6solar_r2i1p1f1_gn_209501-210012.nc", "size_bytes": 4035665, "sha256": "afabc914699da6f564dfbe31ab07a1c68861c7bbaf267538ad811c0f4871b46f", "tracking_id": "hdl:21.14100/acba9833-c42f-4d15-ad8b-c343a9445839",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/GeoMIP/MPI-M/MPI-ESM1-2-LR/G6solar/r2i1p1f1/Amon/pr/gn/v20190710/pr_Amon_MPI-ESM1-2-LR_G6solar_r2i1p1f1_gn_209501-210012.nc"
+    },
+    {
+      "dataset_key": "MPI-ESM1-2-LR.G6sulfur.r2i1p1f1.Amon.pr.gn.v20190710", "activity_id": "GeoMIP", "experiment_id": "G6sulfur", "institution_id": "MPI-M", "variant_label": "r2i1p1f1", "grid_label": "gn", "version": "v20190710",
+      "filename": "pr_Amon_MPI-ESM1-2-LR_G6sulfur_r2i1p1f1_gn_205501-207412.nc", "size_bytes": 13272203, "sha256": "1555c94606343dbf80e57ebdbd5f94b0a7234e5a3b6a9dee0b4bc110bac56b36", "tracking_id": "hdl:21.14100/731e4c9d-655f-41e6-b338-95c5c59aae0d",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/GeoMIP/MPI-M/MPI-ESM1-2-LR/G6sulfur/r2i1p1f1/Amon/pr/gn/v20190710/pr_Amon_MPI-ESM1-2-LR_G6sulfur_r2i1p1f1_gn_205501-207412.nc"
+    },
+    {
+      "dataset_key": "MPI-ESM1-2-LR.G6sulfur.r2i1p1f1.Amon.pr.gn.v20190710", "activity_id": "GeoMIP", "experiment_id": "G6sulfur", "institution_id": "MPI-M", "variant_label": "r2i1p1f1", "grid_label": "gn", "version": "v20190710",
+      "filename": "pr_Amon_MPI-ESM1-2-LR_G6sulfur_r2i1p1f1_gn_207501-209412.nc", "size_bytes": 13273967, "sha256": "33098073b4c108f0e9183cfd7fd446f18f4f17f314af1240610b9850ffdbcadb", "tracking_id": "hdl:21.14100/2ac3f669-45e7-4be5-a35b-306fa14ca9a8",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/GeoMIP/MPI-M/MPI-ESM1-2-LR/G6sulfur/r2i1p1f1/Amon/pr/gn/v20190710/pr_Amon_MPI-ESM1-2-LR_G6sulfur_r2i1p1f1_gn_207501-209412.nc"
+    },
+    {
+      "dataset_key": "MPI-ESM1-2-LR.G6sulfur.r2i1p1f1.Amon.pr.gn.v20190710", "activity_id": "GeoMIP", "experiment_id": "G6sulfur", "institution_id": "MPI-M", "variant_label": "r2i1p1f1", "grid_label": "gn", "version": "v20190710",
+      "filename": "pr_Amon_MPI-ESM1-2-LR_G6sulfur_r2i1p1f1_gn_209501-210012.nc", "size_bytes": 4026099, "sha256": "5e966b763415029812fc76760694836ae5900e28a7361924f56c638159d43bd6", "tracking_id": "hdl:21.14100/308ef6c4-27a2-42ab-b93a-24bae3213d52",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/GeoMIP/MPI-M/MPI-ESM1-2-LR/G6sulfur/r2i1p1f1/Amon/pr/gn/v20190710/pr_Amon_MPI-ESM1-2-LR_G6sulfur_r2i1p1f1_gn_209501-210012.nc"
+    },
+    {
+      "dataset_key": "MPI-ESM1-2-LR.ssp585.r2i1p1f1.Amon.pr.gn.v20190710", "activity_id": "ScenarioMIP", "experiment_id": "ssp585", "institution_id": "MPI-M", "variant_label": "r2i1p1f1", "grid_label": "gn", "version": "v20190710",
+      "filename": "pr_Amon_MPI-ESM1-2-LR_ssp585_r2i1p1f1_gn_205501-207412.nc", "size_bytes": 13280823, "sha256": "5d9d763705926bb86aa34a18a011b0f02430cb12b719d9a522a3b769a9197f5e", "tracking_id": "hdl:21.14100/629d1b67-7b09-40e3-8e9e-31e4ed435404",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-LR/ssp585/r2i1p1f1/Amon/pr/gn/v20190710/pr_Amon_MPI-ESM1-2-LR_ssp585_r2i1p1f1_gn_205501-207412.nc"
+    },
+    {
+      "dataset_key": "MPI-ESM1-2-LR.ssp585.r2i1p1f1.Amon.pr.gn.v20190710", "activity_id": "ScenarioMIP", "experiment_id": "ssp585", "institution_id": "MPI-M", "variant_label": "r2i1p1f1", "grid_label": "gn", "version": "v20190710",
+      "filename": "pr_Amon_MPI-ESM1-2-LR_ssp585_r2i1p1f1_gn_207501-209412.nc", "size_bytes": 13286724, "sha256": "15d51051e8affb31644d180467d2a1d42eb7c635b374d679ff86933467092504", "tracking_id": "hdl:21.14100/7ea63add-05c2-4e07-8905-ba487eb483d7",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-LR/ssp585/r2i1p1f1/Amon/pr/gn/v20190710/pr_Amon_MPI-ESM1-2-LR_ssp585_r2i1p1f1_gn_207501-209412.nc"
+    },
+    {
+      "dataset_key": "MPI-ESM1-2-LR.ssp585.r2i1p1f1.Amon.pr.gn.v20190710", "activity_id": "ScenarioMIP", "experiment_id": "ssp585", "institution_id": "MPI-M", "variant_label": "r2i1p1f1", "grid_label": "gn", "version": "v20190710",
+      "filename": "pr_Amon_MPI-ESM1-2-LR_ssp585_r2i1p1f1_gn_209501-210012.nc", "size_bytes": 4038869, "sha256": "609dafea0980eb2e77642e181c95e3a58c94fff99e4eaad1f4df4c019c11b22b", "tracking_id": "hdl:21.14100/bb9d142a-3e29-450d-8965-ffacb1a853fe",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/ScenarioMIP/MPI-M/MPI-ESM1-2-LR/ssp585/r2i1p1f1/Amon/pr/gn/v20190710/pr_Amon_MPI-ESM1-2-LR_ssp585_r2i1p1f1_gn_209501-210012.nc"
+    }
+  ]
+}

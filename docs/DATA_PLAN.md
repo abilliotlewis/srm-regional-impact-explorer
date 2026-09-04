@@ -1,17 +1,29 @@
 # GeoMIP Data Plan
 
-## First publishable question
+## Current publishable question
 
-How do `G6solar` and `G6sulfur` differ from `ssp585` in late-century Southeast US summer heat and precipitation, and how consistent are those differences across participating Earth system models?
+How do `G6solar` and `G6sulfur` differ from `ssp585` in late-century Southeast U.S. seasonal temperature and precipitation, and how consistent are those differences across a fixed matched-model sample?
 
-## Phase 1 scope
+## Current scope
 
 - Region: 24–38°N, 100–74°W
 - Future climatology: 2071–2100
-- Scenarios: `ssp585`, `ssp245`, `G6solar`, `G6sulfur`
+- Direct-comparison scenarios: `ssp585`, `G6solar`, `G6sulfur`
 - Seasons: annual, DJF, MAM, JJA, SON
-- Start with monthly `tasmax` and `pr`
-- Add daily `tasmax` and `pr` only after the monthly workflow passes validation
+- Variables completed: monthly `tasmax` and `pr`
+- Fixed sample: CNRM-ESM2-1, IPSL-CM6A-LR, MPI-ESM1-2-LR, and UKESM1-0-LL using the exact variants and grids in the Phase 3 and Phase 4 selection logs
+
+## Phase roadmap
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | Initial single-model monthly `tasmax` workflow | Historical checkpoint |
+| 2 | Two-model monthly `tasmax` comparison | Historical checkpoint |
+| 3 | Defensible four-model monthly `tasmax` ensemble | Complete |
+| 4 | Monthly `pr` for the same matched four-model sample | Complete |
+| 5 | Daily temperature and precipitation extremes | Later work |
+| 6 | Predefined subregional analysis | Later work |
+| 7 | Spatial agreement and uncertainty maps | Later work |
 
 ## Candidate CMIP variables
 
@@ -24,8 +36,8 @@ How do `G6solar` and `G6sulfur` differ from `ssp585` in late-century Southeast U
 
 ## Model-selection rules
 
-1. Require all four scenarios from the same model when making direct four-way comparisons.
-2. Use a single ensemble member per model for the first release, preferably `r1i1p1f1` when available.
+1. Require G6solar, G6sulfur, and SSP5-8.5 from a demonstrably compatible model branch for direct comparisons.
+2. Preserve the exact ensemble member selected for each model; do not substitute members to increase model count.
 3. Preserve institution, source ID, experiment ID, variant label, grid label and file tracking IDs.
 4. Do not silently mix native and regridded products.
 5. Report exactly which models contribute to every result.
@@ -51,7 +63,6 @@ Remove the demonstration warning only when:
 - at least one experienced climate-model researcher has reviewed the methodology;
 - the dataset card lists limitations and excludes deployment recommendations.
 
-## AI component after the scientific baseline
+## Possible AI component after the scientific baseline
 
-Train a lightweight emulator only after the multi-model table is validated. Inputs can include latitude, longitude, season, scenario and baseline climatology. Outputs should be distributions or quantiles, not a single falsely precise prediction. Evaluate with leave-one-model-out validation so performance reflects generalization across climate models rather than random grid-cell interpolation.
-
+An emulator remains outside the current scope. If added later, outputs should be distributions or quantiles rather than a single falsely precise prediction, and evaluation should use leave-one-model-out validation so performance reflects generalization across climate models rather than random grid-cell interpolation.

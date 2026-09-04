@@ -8,7 +8,7 @@ authors:
 repository-code: "https://github.com/abilliotlewis/srm-regional-impact-explorer"
 url: "https://github.com/abilliotlewis/srm-regional-impact-explorer"
 license: MIT
-version: "0.3.0"
+version: "0.4.0"
 date-released: "2026-09-04"
 keywords:
   - solar radiation modification
@@ -20,6 +20,5 @@ keywords:
   - climate modeling
 abstract: >
   An open, reproducible research software project for comparing regional
-  climate responses under solar radiation modification scenarios, with
-  an initial focus on G6solar and G6sulfur impacts over the Southeast
-  United States.
+  temperature and precipitation responses under the G6solar and G6sulfur
+  solar radiation modification experiments over the Southeast United States.

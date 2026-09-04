@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+  "created_utc": "2026-09-04",
+  "project": "CMIP6",
+  "source_id": "UKESM1-0-LL",
+  "variable_id": "pr",
+  "table_id": "Amon",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "license_source": "NetCDF global attribute",
+  "analysis_period": "2071-2100",
+  "selection_note": "Same r1i1p1f2 gn direct-parent experiment set used for Phase 3 tasmax.",
+  "experiments": {
+    "G6solar": {"parent_experiment_id": "ssp585", "parent_variant_label": "r1i1p1f2"},
+    "G6sulfur": {"parent_experiment_id": "ssp585", "parent_variant_label": "r1i1p1f2"},
+    "ssp585": {"parent_experiment_id": "historical", "parent_variant_label": "r1i1p1f2"}
+  },
+  "records": [
+    {
+      "dataset_key": "UKESM1-0-LL.G6solar.r1i1p1f2.Amon.pr.gn.v20191031",
+      "activity_id": "GeoMIP", "experiment_id": "G6solar", "institution_id": "MOHC", "variant_label": "r1i1p1f2", "grid_label": "gn", "version": "v20191031",
+      "filename": "pr_Amon_UKESM1-0-LL_G6solar_r1i1p1f2_gn_205001-210012.nc", "size_bytes": 54262708, "sha256": "b3bbd07889298f18d9a4b2eaa178f724650a4887f8c7c95bb6a9648a28f951a5", "tracking_id": "hdl:21.14100/511906a3-9fa8-4f85-a6b8-dddfb6cf1a0b",
+      "url": "https://esgf.ceda.ac.uk/thredds/fileServer/esg_cmip6/CMIP6/GeoMIP/MOHC/UKESM1-0-LL/G6solar/r1i1p1f2/Amon/pr/gn/v20191031/pr_Amon_UKESM1-0-LL_G6solar_r1i1p1f2_gn_205001-210012.nc"
+    },
+    {
+      "dataset_key": "UKESM1-0-LL.G6sulfur.r1i1p1f2.Amon.pr.gn.v20191113",
+      "activity_id": "GeoMIP", "experiment_id": "G6sulfur", "institution_id": "MOHC", "variant_label": "r1i1p1f2", "grid_label": "gn", "version": "v20191113",
+      "filename": "pr_Amon_UKESM1-0-LL_G6sulfur_r1i1p1f2_gn_205001-210012.nc", "size_bytes": 54265638, "sha256": "da96941397c3204eaec7fd034d49fe635902074df3fb91276574c910256e2351", "tracking_id": "hdl:21.14100/fe47ce4f-56ac-4943-ab39-0c8462e65f89",
+      "url": "https://esgf.ceda.ac.uk/thredds/fileServer/esg_cmip6/CMIP6/GeoMIP/MOHC/UKESM1-0-LL/G6sulfur/r1i1p1f2/Amon/pr/gn/v20191113/pr_Amon_UKESM1-0-LL_G6sulfur_r1i1p1f2_gn_205001-210012.nc"
+    },
+    {
+      "dataset_key": "UKESM1-0-LL.ssp585.r1i1p1f2.Amon.pr.gn.v20190507",
+      "activity_id": "ScenarioMIP", "experiment_id": "ssp585", "institution_id": "MOHC", "variant_label": "r1i1p1f2", "grid_label": "gn", "version": "v20190507",
+      "filename": "pr_Amon_UKESM1-0-LL_ssp585_r1i1p1f2_gn_205001-210012.nc", "size_bytes": 58444545, "sha256": "85226a651c92fbd14be534aa93711bd8f54e8139d398e817f6c8e5a3055b28a2", "tracking_id": "hdl:21.14100/6aeb40bd-911c-4483-83b0-5f5cef2ac5a0",
+      "url": "https://esgf.ceda.ac.uk/thredds/fileServer/esg_cmip6/CMIP6/ScenarioMIP/MOHC/UKESM1-0-LL/ssp585/r1i1p1f2/Amon/pr/gn/v20190507/pr_Amon_UKESM1-0-LL_ssp585_r1i1p1f2_gn_205001-210012.nc"
+    }
+  ]
+}

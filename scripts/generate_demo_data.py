@@ -53,6 +53,14 @@ def build() -> pd.DataFrame:
                                 {
                                     "model": model,
                                     "scenario": scenario,
+                                    "variant_label": "r1i1p1f1",
+                                    "grid_label": "demo-native",
+                                    "parent_experiment_id": (
+                                        "ssp585" if scenario.startswith("G6") else "not_applicable"
+                                    ),
+                                    "parent_variant_label": (
+                                        "r1i1p1f1" if scenario.startswith("G6") else "not_applicable"
+                                    ),
                                     "season": season,
                                     "metric": metric,
                                     "lat": lat,
@@ -72,4 +80,3 @@ if __name__ == "__main__":
     frame = build()
     frame.to_csv(output, index=False)
     print(f"Wrote {len(frame):,} demonstration records to {output}")
-

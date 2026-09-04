@@ -10,10 +10,33 @@ import httpx
 
 def load_manifest(path: Path) -> dict:
     manifest = json.loads(path.read_text())
+    top_level_required = {
+        "manifest_version",
+        "source_id",
+        "variable_id",
+        "table_id",
+        "license",
+        "analysis_period",
+    }
+    top_level_missing = top_level_required.difference(manifest)
+    if top_level_missing:
+        raise ValueError(f"Manifest is missing {sorted(top_level_missing)}")
     records = manifest.get("records", [])
     if not records:
         raise ValueError("Manifest contains no records")
-    required = {"dataset_key", "filename", "size_bytes", "sha256", "url"}
+    required = {
+        "dataset_key",
+        "activity_id",
+        "experiment_id",
+        "institution_id",
+        "variant_label",
+        "grid_label",
+        "version",
+        "filename",
+        "size_bytes",
+        "sha256",
+        "url",
+    }
     for index, record in enumerate(records):
         missing = required.difference(record)
         if missing:
@@ -76,4 +99,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

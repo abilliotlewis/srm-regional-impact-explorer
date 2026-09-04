@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from download_manifest import load_manifest, sha256_file, validate_file
+from build_phase1 import validate_matched_experiments
 
 
 def test_phase1_manifest_is_complete():
@@ -57,3 +58,22 @@ def test_manifest_rejects_incomplete_records(tmp_path):
         assert "missing" in str(error).lower()
     else:
         raise AssertionError("Expected incomplete-manifest validation error")
+
+
+def test_matched_experiment_validation_rejects_parent_variant_mix():
+    manifest = {
+        "source_id": "TEST-ESM",
+        "parent_experiment_id": "ssp585",
+        "parent_variant_label": "r1i1p1f1",
+        "records": [
+            {"experiment_id": "G6solar", "variant_label": "r1i1p1f1", "grid_label": "gn"},
+            {"experiment_id": "G6sulfur", "variant_label": "r2i1p1f1", "grid_label": "gn"},
+            {"experiment_id": "ssp585", "variant_label": "r2i1p1f1", "grid_label": "gn"},
+        ],
+    }
+    try:
+        validate_matched_experiments(manifest)
+    except ValueError as error:
+        assert "variant-matched" in str(error)
+    else:
+        raise AssertionError("Expected parent-variant mismatch validation error")

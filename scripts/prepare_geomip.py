@@ -38,6 +38,60 @@ def convert_units(data: xr.DataArray, variable: str) -> tuple[xr.DataArray, str]
     return data, units
 
 
+def validate_monthly_coverage(data: xr.DataArray, start_year: int, end_year: int) -> None:
+    """Require one and only one value for every requested calendar month."""
+    years = data.time.dt.year.values.astype(int)
+    months = data.time.dt.month.values.astype(int)
+    observed = list(zip(years, months, strict=True))
+    expected = [
+        (year, month)
+        for year in range(start_year, end_year + 1)
+        for month in range(1, 13)
+    ]
+    if observed != expected:
+        missing = sorted(set(expected).difference(observed))
+        duplicates = sorted({item for item in observed if observed.count(item) > 1})
+        raise ValueError(
+            "Monthly coverage must contain exactly one ordered value per month "
+            f"from {start_year}-01 through {end_year}-12; "
+            f"missing={missing[:6]}, duplicates={duplicates[:6]}"
+        )
+
+
+def seasonal_climatology(
+    data: xr.DataArray,
+    season: str,
+    months: list[int],
+    start_year: int,
+    end_year: int,
+) -> xr.DataArray:
+    """Calculate a day-weighted climatology from complete seasonal years."""
+    selected = data.where(data.time.dt.month.isin(months), drop=True)
+    years = selected.time.dt.year.astype(int)
+    if season == "DJF":
+        season_year = years + (selected.time.dt.month == 12).astype(int)
+        first_year = start_year + 1
+    else:
+        season_year = years
+        first_year = start_year
+    season_year = season_year.rename("season_year")
+    selected = selected.where(
+        (season_year >= first_year) & (season_year <= end_year), drop=True
+    )
+    season_year = season_year.where(
+        (season_year >= first_year) & (season_year <= end_year), drop=True
+    )
+
+    counts = xr.ones_like(selected.time, dtype=int).groupby(season_year).sum("time")
+    if not bool((counts == len(months)).all()):
+        raise ValueError(f"{season} contains an incomplete seasonal year")
+
+    weights = selected.time.dt.days_in_month.astype(float)
+    numerator = (selected * weights).groupby(season_year).sum("time")
+    denominator = weights.groupby(season_year).sum("time")
+    return (numerator / denominator).mean("season_year")
+
+
 def prepare(
     source: Path | Sequence[Path],
     scenario: str,
@@ -46,6 +100,10 @@ def prepare(
     metric: str,
     start_year: int,
     end_year: int,
+    variant_label: str = "unspecified",
+    grid_label: str = "unspecified",
+    parent_experiment_id: str = "not_applicable",
+    parent_variant_label: str = "not_applicable",
 ) -> pd.DataFrame:
     sources = [str(path) for path in source] if isinstance(source, Sequence) else str(source)
     dataset = xr.open_mfdataset(
@@ -56,16 +114,25 @@ def prepare(
         compat="override",
     )
     data = normalize_longitude(dataset[variable])
-    data = data.sel(time=slice(str(start_year), str(end_year)), lat=slice(24, 38), lon=slice(-100, -74))
+    data = data.sel(time=slice(str(start_year), str(end_year)))
+    validate_monthly_coverage(data, start_year, end_year)
+    data = data.where((data.lat >= 24) & (data.lat <= 38), drop=True)
+    data = data.where((data.lon >= -100) & (data.lon <= -74), drop=True)
+    if data.sizes.get("lat", 0) == 0 or data.sizes.get("lon", 0) == 0:
+        raise ValueError("No grid-cell centers fall inside the Southeast U.S. domain")
     data, units = convert_units(data, variable)
     frames = []
     for season, months in SEASON_MONTHS.items():
-        climatology = data.where(data.time.dt.month.isin(months), drop=True).mean("time")
+        climatology = seasonal_climatology(data, season, months, start_year, end_year)
         table = climatology.to_dataframe(name="value").reset_index()
         table = table[["lat", "lon", "value"]].dropna()
         table = table.assign(
             model=model,
             scenario=scenario,
+            variant_label=variant_label,
+            grid_label=grid_label,
+            parent_experiment_id=parent_experiment_id,
+            parent_variant_label=parent_variant_label,
             season=season,
             metric=metric,
             units=units,
@@ -83,6 +150,10 @@ def main() -> None:
     parser.add_argument("--model", required=True)
     parser.add_argument("--variable", required=True, choices=["tas", "tasmax", "pr"])
     parser.add_argument("--metric", required=True)
+    parser.add_argument("--variant-label", default="unspecified")
+    parser.add_argument("--grid-label", default="unspecified")
+    parser.add_argument("--parent-experiment-id", default="not_applicable")
+    parser.add_argument("--parent-variant-label", default="not_applicable")
     parser.add_argument("--start-year", type=int, default=2071)
     parser.add_argument("--end-year", type=int, default=2100)
     parser.add_argument("--output", type=Path, required=True)
@@ -95,6 +166,10 @@ def main() -> None:
         metric=args.metric,
         start_year=args.start_year,
         end_year=args.end_year,
+        variant_label=args.variant_label,
+        grid_label=args.grid_label,
+        parent_experiment_id=args.parent_experiment_id,
+        parent_variant_label=args.parent_variant_label,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     frame.to_csv(args.output, index=False)

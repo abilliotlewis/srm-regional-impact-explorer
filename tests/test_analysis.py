@@ -13,8 +13,11 @@ from generate_demo_data import build
 from prepare_geomip import prepare
 from srm_explorer.analysis import (
     difference_grid,
+    ensemble_statistics,
+    intervention_differences,
     load_metrics,
     regional_differences,
+    regional_model_means,
     summarize_region,
 )
 
@@ -30,6 +33,7 @@ def test_demo_schema_round_trip(tmp_path):
 
 def test_g6solar_demo_is_cooler_than_ssp585():
     frame = build()
+    frame = frame[frame.model == "DEMO-ESM-A"]
     diff = difference_grid(frame, "G6solar", "tasmax_mean", "JJA")
     assert diff.value.mean() < 0
 
@@ -81,3 +85,70 @@ def test_monthly_netcdf_preparation(tmp_path):
     assert set(frame.season) == {"ANN", "DJF", "MAM", "JJA", "SON"}
     assert np.isclose(frame.value.mean(), 26.85)
     assert not frame.is_demo.any()
+
+
+def test_djf_uses_complete_cross_year_season_and_day_weights(tmp_path):
+    times = pd.date_range("2071-01-01", periods=24, freq="MS")
+    values = np.full((24, 1, 1), 273.15)
+    values[11, 0, 0] = 283.15  # December 2071
+    values[12, 0, 0] = 293.15  # January 2072
+    values[13, 0, 0] = 303.15  # February 2072
+    source = tmp_path / "tasmax.nc"
+    xr.Dataset(
+        {"tasmax": (("time", "lat", "lon"), values, {"units": "K"})},
+        coords={"time": times, "lat": [30.0], "lon": [-85.0]},
+    ).to_netcdf(source, engine="h5netcdf")
+    frame = prepare(source, "G6solar", "TEST", "tasmax", "tasmax_mean", 2071, 2072)
+    actual = frame.loc[frame.season == "DJF", "value"].iloc[0]
+    expected = (10 * 31 + 20 * 31 + 30 * 29) / (31 + 31 + 29)
+    assert np.isclose(actual, expected)
+
+
+def test_preparation_rejects_missing_month(tmp_path):
+    times = pd.date_range("2071-01-01", periods=12, freq="MS").delete(5)
+    source = tmp_path / "tasmax.nc"
+    xr.Dataset(
+        {"tasmax": (("time", "lat", "lon"), np.ones((11, 1, 1)), {"units": "K"})},
+        coords={"time": times, "lat": [30.0], "lon": [-85.0]},
+    ).to_netcdf(source, engine="h5netcdf")
+    try:
+        prepare(source, "G6solar", "TEST", "tasmax", "tasmax_mean", 2071, 2071)
+    except ValueError as error:
+        assert "Monthly coverage" in str(error)
+    else:
+        raise AssertionError("Expected missing-month validation error")
+
+
+def test_regional_mean_uses_latitude_weights():
+    values = pd.DataFrame(
+        {
+            "model": ["TEST", "TEST"],
+            "variant_label": ["r1", "r1"],
+            "grid_label": ["gn", "gn"],
+            "lat": [0.0, 60.0],
+            "value": [0.0, 10.0],
+        }
+    )
+    result = regional_model_means(values)
+    assert np.isclose(result.value.iloc[0], 10.0 / 3.0)
+
+
+def test_variant_mismatch_is_rejected():
+    frame = build()
+    frame.loc[frame.scenario == "G6solar", "parent_variant_label"] = "r9i9p9f9"
+    try:
+        regional_differences(frame, "G6solar", "tasmax_mean", "JJA")
+    except ValueError as error:
+        assert "Incompatible" in str(error)
+    else:
+        raise AssertionError("Expected variant mismatch validation error")
+
+
+def test_phase3_ensemble_counts_and_intervention_difference():
+    frame = build()
+    per_model = regional_differences(frame, "G6solar", "tasmax_mean", "JJA")
+    summary = ensemble_statistics(per_model)
+    assert summary.model_count.iloc[0] == 3
+    assert 0 <= summary.sign_agreement.iloc[0] <= 1
+    comparison = intervention_differences(frame, "tasmax_mean", "JJA")
+    assert comparison.model.nunique() == 3

@@ -9,6 +9,10 @@ import pandas as pd
 REQUIRED_COLUMNS = {
     "model",
     "scenario",
+    "variant_label",
+    "grid_label",
+    "parent_experiment_id",
+    "parent_variant_label",
     "season",
     "metric",
     "lat",
@@ -48,7 +52,17 @@ def load_metrics(path: str | Path) -> pd.DataFrame:
         raise ValueError("lat, lon, and value cannot contain missing values")
     if frame["is_demo"].nunique() != 1:
         raise ValueError("Do not mix demonstration and model-derived records in one explorer file")
-    key = ["model", "scenario", "season", "metric", "lat", "lon", "period"]
+    key = [
+        "model",
+        "scenario",
+        "variant_label",
+        "grid_label",
+        "season",
+        "metric",
+        "lat",
+        "lon",
+        "period",
+    ]
     if frame.duplicated(key).any():
         raise ValueError(f"Duplicate records found for key {key}")
     return frame
@@ -73,6 +87,8 @@ def grid_mean(
     frame: pd.DataFrame, scenario: str, metric: str, season: str
 ) -> pd.DataFrame:
     selected = _selection(frame, scenario, metric, season)
+    if selected[["model", "grid_label"]].drop_duplicates().shape[0] != 1:
+        raise ValueError("Map calculations require exactly one model on one native grid")
     grouped = (
         selected.groupby(["lat", "lon"], as_index=False)
         .agg(value=("value", "mean"), model_spread=("value", "std"), model_count=("model", "nunique"))
@@ -88,16 +104,12 @@ def difference_grid(
     season: str,
     reference: str = "ssp585",
 ) -> pd.DataFrame:
-    target = _selection(frame, scenario, metric, season)[
-        ["model", "lat", "lon", "value"]
-    ].rename(columns={"value": "target_value"})
-    baseline = _selection(frame, reference, metric, season)[
-        ["model", "lat", "lon", "value"]
-    ].rename(columns={"value": "reference_value"})
-    matched = target.merge(baseline, on=["model", "lat", "lon"], validate="one_to_one")
+    matched = _matched_model_grids(frame, scenario, metric, season, reference)
+    if matched["model"].nunique() != 1:
+        raise ValueError("Difference maps require exactly one matched model grid")
     if matched.empty:
         raise ValueError(f"No matched model-grid records for {scenario} and {reference}")
-    matched["difference"] = matched["target_value"] - matched["reference_value"]
+    matched["difference"] = matched["value"] - matched["reference_value"]
     return (
         matched.groupby(["lat", "lon"], as_index=False)
         .agg(
@@ -113,11 +125,88 @@ def regional_model_means(values: pd.DataFrame) -> pd.DataFrame:
     """Return cosine-latitude-weighted means without mixing model grids."""
     weighted = values.assign(weight=np.cos(np.deg2rad(values["lat"])))
     weighted["weighted_value"] = weighted["value"] * weighted["weight"]
-    totals = weighted.groupby("model", as_index=False).agg(
+    identity = [column for column in ["model", "variant_label", "grid_label"] if column in values]
+    totals = weighted.groupby(identity, as_index=False).agg(
         weighted_value=("weighted_value", "sum"), weight=("weight", "sum")
     )
     totals["value"] = totals["weighted_value"] / totals["weight"]
-    return totals[["model", "value"]]
+    return totals[identity + ["value"]]
+
+
+def _matched_model_grids(
+    frame: pd.DataFrame,
+    scenario: str,
+    metric: str,
+    season: str,
+    reference: str = "ssp585",
+) -> pd.DataFrame:
+    """Return target/reference cells only after explicit branch compatibility checks."""
+    target = _selection(frame, scenario, metric, season).copy()
+    baseline = _selection(frame, reference, metric, season).copy()
+    for label, selected in ((scenario, target), (reference, baseline)):
+        counts = selected.groupby("model").agg(
+            variants=("variant_label", "nunique"), grids=("grid_label", "nunique")
+        )
+        if (counts > 1).any().any():
+            raise ValueError(f"{label} mixes variants or grids within a model")
+
+    target_identity = target[
+        [
+            "model",
+            "variant_label",
+            "grid_label",
+            "parent_experiment_id",
+            "parent_variant_label",
+        ]
+    ].drop_duplicates()
+    reference_identity = baseline[
+        [
+            "model",
+            "variant_label",
+            "grid_label",
+            "parent_experiment_id",
+            "parent_variant_label",
+        ]
+    ].drop_duplicates()
+    identity = target_identity.merge(
+        reference_identity,
+        on="model",
+        how="inner",
+        suffixes=("", "_reference"),
+        validate="one_to_one",
+    )
+    direct_parent = (
+        (identity["parent_experiment_id"] == reference)
+        & (identity["parent_variant_label"] == identity["variant_label_reference"])
+    )
+    common_parent = (
+        (identity["parent_experiment_id"] == identity["parent_experiment_id_reference"])
+        & (identity["parent_variant_label"] == identity["parent_variant_label_reference"])
+        & (identity["variant_label"] == identity["variant_label_reference"])
+    )
+    incompatible = identity[
+        ~(direct_parent | common_parent)
+        | (identity["grid_label"] != identity["grid_label_reference"])
+    ]
+    if not incompatible.empty:
+        raise ValueError(
+            "Incompatible target/reference branches for models: "
+            + ", ".join(sorted(incompatible["model"]))
+        )
+    if identity.empty:
+        raise ValueError(f"No matched models for {scenario} and {reference}")
+
+    allowed = identity[["model"]]
+    target = target.merge(allowed, on="model", validate="many_to_one")
+    baseline = baseline.merge(allowed, on="model", validate="many_to_one")
+    baseline = baseline[
+        ["model", "grid_label", "lat", "lon", "value"]
+    ].rename(columns={"value": "reference_value"})
+    return target.merge(
+        baseline,
+        on=["model", "grid_label", "lat", "lon"],
+        validate="one_to_one",
+    )
 
 
 def regional_differences(
@@ -128,15 +217,86 @@ def regional_differences(
     reference: str = "ssp585",
 ) -> pd.DataFrame:
     """Return one regional difference per model on each model's native grid."""
-    target = _selection(frame, scenario, metric, season)
-    baseline = _selection(frame, reference, metric, season)[
-        ["model", "lat", "lon", "value"]
-    ].rename(columns={"value": "reference_value"})
-    matched = target.merge(
-        baseline, on=["model", "lat", "lon"], validate="one_to_one"
-    )
+    matched = _matched_model_grids(frame, scenario, metric, season, reference)
     matched["value"] = matched["value"] - matched["reference_value"]
-    return regional_model_means(matched)
+    result = regional_model_means(matched)
+    result["scenario"] = scenario
+    result["reference"] = reference
+    result["season"] = season
+    result["metric"] = metric
+    return result
+
+
+def intervention_differences(
+    frame: pd.DataFrame, metric: str, season: str
+) -> pd.DataFrame:
+    """Return G6solar minus G6sulfur regional response for every matched model."""
+    solar = regional_differences(frame, "G6solar", metric, season).rename(
+        columns={
+            "value": "solar_value",
+            "variant_label": "solar_variant_label",
+            "grid_label": "solar_grid_label",
+        }
+    )
+    sulfur = regional_differences(frame, "G6sulfur", metric, season).rename(
+        columns={
+            "value": "sulfur_value",
+            "variant_label": "sulfur_variant_label",
+            "grid_label": "sulfur_grid_label",
+        }
+    )
+    keep = [
+        "model",
+        "sulfur_variant_label",
+        "sulfur_grid_label",
+        "sulfur_value",
+    ]
+    matched = solar.merge(sulfur[keep], on="model", validate="one_to_one")
+    if (matched["solar_grid_label"] != matched["sulfur_grid_label"]).any():
+        raise ValueError("G6solar and G6sulfur grids differ within a model")
+    matched["value"] = matched["solar_value"] - matched["sulfur_value"]
+    matched["scenario"] = "G6solar-minus-G6sulfur"
+    return matched[
+        [
+            "model",
+            "solar_variant_label",
+            "sulfur_variant_label",
+            "solar_grid_label",
+            "season",
+            "metric",
+            "scenario",
+            "value",
+        ]
+    ]
+
+
+def ensemble_statistics(per_model: pd.DataFrame) -> pd.DataFrame:
+    """Summarize an ensemble while retaining explicit sign disagreement metrics."""
+    group_columns = [column for column in ["scenario", "season", "metric"] if column in per_model]
+
+    def summarize(group: pd.DataFrame) -> pd.Series:
+        values = group["value"]
+        positive = float((values > 0).mean())
+        negative = float((values < 0).mean())
+        return pd.Series(
+            {
+                "mean": values.mean(),
+                "median": values.median(),
+                "std": values.std(ddof=1) if len(values) > 1 else 0.0,
+                "minimum": values.min(),
+                "maximum": values.max(),
+                "model_count": values.size,
+                "fraction_positive": positive,
+                "fraction_negative": negative,
+                "sign_agreement": max(positive, negative),
+            }
+        )
+
+    result = per_model.groupby(group_columns, as_index=False).apply(
+        summarize, include_groups=False
+    ).reset_index(drop=True)
+    result["model_count"] = result["model_count"].astype(int)
+    return result
 
 
 def make_map(
@@ -191,14 +351,7 @@ def summarize_region(
     selected = _selection(frame, scenario, metric, season)
 
     if mode == "Difference from SSP5-8.5" and scenario != "ssp585":
-        baseline = _selection(frame, "ssp585", metric, season)[
-            ["model", "lat", "lon", "value"]
-        ].rename(columns={"value": "reference_value"})
-        matched = selected.merge(
-            baseline, on=["model", "lat", "lon"], validate="one_to_one"
-        )
-        matched["value"] = matched["value"] - matched["reference_value"]
-        per_model = regional_model_means(matched)
+        per_model = regional_differences(frame, scenario, metric, season)
         statistic_label = "Regional mean difference"
         model_label = "Matched models"
     else:

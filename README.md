@@ -2,37 +2,35 @@
 
 An open, reproducible starter project for comparing regional climate responses under solar radiation modification scenarios.
 
-The first scientific question is:
+The current scientific question is:
 
-> How do solar-irradiance reduction and stratospheric aerosol intervention differ in their effects on Southeast US heat and precipitation indicators?
+> How do G6solar and G6sulfur differ in their effects on late-century Southeast U.S. `tasmax`, and how consistently do matched models show that difference?
 
 ## Current status
 
-The project now has a reproducible two-model checkpoint from official ESGF-hosted data. The comparison uses monthly `tasmax` from IPSL-CM6A-LR and MPI-ESM1-2-LR for 2071–2100. Raw NetCDF files and the generated analysis table stay outside Git, while exact source URLs, versions, byte counts, SHA-256 checksums, licenses, and parent-run metadata are versioned in the repository.
+Phase 3 provides a reproducible four-model checkpoint from official CMIP6 archive data. The matched comparison uses monthly `tasmax` from CNRM-ESM2-1, IPSL-CM6A-LR, MPI-ESM1-2-LR, and UKESM1-0-LL for 2071–2100. Raw NetCDF files and the generated gridded analysis table stay outside Git, while exact source URLs, versions, tracking IDs, byte counts, SHA-256 checksums, licenses, variants, grids, and parent-run metadata are versioned in the repository.
 
 The repository retains a deterministic synthetic-data generator for interface tests. The app clearly identifies whether its active records are synthetic or model-derived.
 
 ## Current result
 
-For the two-model mean, the 2071–2100 JJA area-weighted box-mean `tasmax` difference from SSP5-8.5 is -2.09 °C under G6solar and -1.72 °C under G6sulfur. Both models show stronger JJA cooling under G6solar. This remains a checkpoint, not a robust ensemble conclusion.
+For the four-model mean, the 2071–2100 JJA area-weighted box-mean `tasmax` difference from SSP5-8.5 is -2.14 °C under G6solar and -1.84 °C under G6sulfur. Every included model shows cooling under both interventions and a more negative JJA response under G6solar. The mean G6solar-minus-G6sulfur difference is -0.30 °C, with individual models ranging from -0.40 to -0.18 °C.
 
-![Two-model regional tasmax comparison](docs/phase2_tasmax_regional.png)
+![Four-model JJA regional tasmax comparison](docs/phase3_tasmax_ensemble.png)
 
-See [the Phase 2 checkpoint](docs/PHASE2_CHECKPOINT.md) for results and limitations. The [Phase 1 result note](docs/PHASE1_RESULT.md) preserves the initial single-model milestone.
+This is a defensible matched four-model result, not a general conclusion about SRM. MAM splits 2–2 on the sign of the G6solar-minus-G6sulfur difference, and DJF G6sulfur includes one model with warming relative to SSP5-8.5. See [the Phase 3 checkpoint](docs/PHASE3_CHECKPOINT.md) for every seasonal statistic and limitation, and [the model-selection log](docs/PHASE3_MODEL_SELECTION.md) for inclusion and exclusion decisions. The [Phase 2 checkpoint](docs/PHASE2_CHECKPOINT.md) remains the historical two-model result.
 
-## Scenarios
+## Phase 3 experiments
 
 - `ssp585`: high-forcing reference scenario
-- `ssp245`: moderate-forcing comparison scenario
 - `G6solar`: solar-irradiance reduction against the SSP5-8.5 background
 - `G6sulfur`: stratospheric sulfate intervention against the SSP5-8.5 background
 
-## Included metrics
+The deterministic demonstration generator and historical manifests also retain `ssp245`, but it is not part of the Phase 3 direct comparison.
+
+## Current metric
 
 - `tasmax_mean`: mean daily maximum near-surface air temperature
-- `pr_mean`: mean precipitation rate
-- `rx1day`: annual or seasonal maximum one-day precipitation
-- `cdd`: maximum consecutive dry days
 
 ## Quick start
 
@@ -51,14 +49,14 @@ pytest
 
 ## Replace the demonstration data
 
-The real-data manifests contain matched monthly `tasmax` files for IPSL-CM6A-LR and MPI-ESM1-2-LR. Download, verify, and process them with:
+The real-data manifests contain the matched monthly `tasmax` files used for the four-model Phase 3 ensemble. Download, verify, process, and reproduce the tables and figures with:
 
 ```bash
 python scripts/build_phase1.py --download
-python scripts/make_multimodel_figure.py
+python scripts/make_phase3_outputs.py
 ```
 
-The downloader validates every file against its official ESGF byte count and SHA-256 checksum before the analysis begins. Raw NetCDF and derived CSV files remain untracked by Git.
+The downloader validates every file against its recorded byte count and SHA-256 checksum before the analysis begins. The build also checks embedded experiment, model, variant, grid, tracking, and parent metadata. Raw NetCDF and the gridded processed CSV remain untracked by Git; compact regional result tables are versioned under `docs/`.
 
 For other models or variables:
 
@@ -78,13 +76,15 @@ src/srm_explorer/analysis.py  Data loading, validation, summaries, plots
 scripts/generate_demo_data.py Deterministic demonstration data generator
 scripts/prepare_geomip.py     NetCDF-to-explorer preprocessing starter
 scripts/download_manifest.py  Checksum-verifying ESGF downloader
-scripts/build_phase1.py        First IPSL real-data build
-scripts/make_multimodel_figure.py  Native-grid regional comparison figure
+scripts/build_phase1.py        Checksum- and branch-validated four-model build
+scripts/make_phase3_outputs.py Phase 3 regional tables and figures
 data/manifests/                Versioned source records and checksums
 data/processed/               Generated or explorer-ready tables
 docs/DATA_PLAN.md             Real-data acquisition and validation plan
 docs/PHASE1_RESULT.md         First result, method, and limitations
 docs/PHASE2_CHECKPOINT.md      Two-model checkpoint and limitations
+docs/PHASE3_MODEL_SELECTION.md Model inclusion and exclusion audit
+docs/PHASE3_CHECKPOINT.md      Four-model results, uncertainty, and limits
 tests/                         Automated checks
 ```
 
@@ -93,6 +93,8 @@ tests/                         Automated checks
 - Always display whether records are synthetic or model-derived.
 - Preserve model identity instead of presenting an ensemble mean alone.
 - Report spread and model count with every multi-model result.
+- Match variants and parent branches explicitly; never substitute an ensemble member silently.
+- Calculate regional means on native grids before combining models.
 - Do not treat `G6solar` as a complete engineering representation of satellite mirrors. It is a climate-model experiment based on reduced solar irradiance.
 - Distinguish equal global forcing targets from equal regional outcomes.
 

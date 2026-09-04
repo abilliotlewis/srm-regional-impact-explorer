@@ -1,0 +1,65 @@
+{
+  "manifest_version": 2,
+  "created_utc": "2026-09-04",
+  "project": "CMIP6",
+  "source_id": "UKESM1-0-LL",
+  "variable_id": "tasmax",
+  "table_id": "Amon",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "license_source": "NetCDF global attribute",
+  "analysis_period": "2071-2100",
+  "selection_note": "All three experiments use r1i1p1f2 on gn. Both G6 files identify SSP5-8.5 r1i1p1f2 as parent.",
+  "experiments": {
+    "G6solar": {"parent_experiment_id": "ssp585", "parent_variant_label": "r1i1p1f2"},
+    "G6sulfur": {"parent_experiment_id": "ssp585", "parent_variant_label": "r1i1p1f2"},
+    "ssp585": {"parent_experiment_id": "historical", "parent_variant_label": "r1i1p1f2"}
+  },
+  "records": [
+    {
+      "dataset_key": "UKESM1-0-LL.G6solar.r1i1p1f2.Amon.tasmax.gn.v20191031",
+      "activity_id": "GeoMIP",
+      "experiment_id": "G6solar",
+      "institution_id": "MOHC",
+      "variant_label": "r1i1p1f2",
+      "grid_label": "gn",
+      "version": "v20191031",
+      "filename": "tasmax_Amon_UKESM1-0-LL_G6solar_r1i1p1f2_gn_205001-210012.nc",
+      "size_bytes": 39160803,
+      "sha256": "7ff37cec2f2cd735ef790f608200bee779e4b934eda1ec002d5d014d8ccbead6",
+      "source_md5": "ecbb931dc0916e10cbed917f603fa0f9",
+      "tracking_id": "hdl:21.14100/c3c64740-8a24-48c0-9cd8-6da1ba8708f5",
+      "url": "https://dap.ceda.ac.uk/badc/cmip6/data/CMIP6/GeoMIP/MOHC/UKESM1-0-LL/G6solar/r1i1p1f2/Amon/tasmax/gn/files/d20191031/tasmax_Amon_UKESM1-0-LL_G6solar_r1i1p1f2_gn_205001-210012.nc?download=1"
+    },
+    {
+      "dataset_key": "UKESM1-0-LL.G6sulfur.r1i1p1f2.Amon.tasmax.gn.v20191113",
+      "activity_id": "GeoMIP",
+      "experiment_id": "G6sulfur",
+      "institution_id": "MOHC",
+      "variant_label": "r1i1p1f2",
+      "grid_label": "gn",
+      "version": "v20191113",
+      "filename": "tasmax_Amon_UKESM1-0-LL_G6sulfur_r1i1p1f2_gn_205001-210012.nc",
+      "size_bytes": 39130587,
+      "sha256": "7acd57b87cbdd22bb54741ea16734a0f50f33da9ecad44905fa70d2c378e8cd8",
+      "source_md5": "d7b6918e43fc0f2f5b6899d9b28fa336",
+      "tracking_id": "hdl:21.14100/42261e8f-b8fb-44c1-b823-97be5ce0a332",
+      "url": "https://dap.ceda.ac.uk/badc/cmip6/data/CMIP6/GeoMIP/MOHC/UKESM1-0-LL/G6sulfur/r1i1p1f2/Amon/tasmax/gn/files/d20191113/tasmax_Amon_UKESM1-0-LL_G6sulfur_r1i1p1f2_gn_205001-210012.nc?download=1"
+    },
+    {
+      "dataset_key": "UKESM1-0-LL.ssp585.r1i1p1f2.Amon.tasmax.gn.v20190726",
+      "activity_id": "ScenarioMIP",
+      "experiment_id": "ssp585",
+      "institution_id": "MOHC",
+      "variant_label": "r1i1p1f2",
+      "grid_label": "gn",
+      "version": "v20190726",
+      "filename": "tasmax_Amon_UKESM1-0-LL_ssp585_r1i1p1f2_gn_205001-210012.nc",
+      "size_bytes": 39126739,
+      "sha256": "3d28c4e5f612589dcc3c9e4487ce5f9ccb6dde383d668277708a94b9eccd0d64",
+      "source_md5": "11680dc61f471689f2d90fe2b631f396",
+      "tracking_id": "hdl:21.14100/fb28865d-0367-4841-8fa8-6ca68f8e0c79",
+      "url": "https://dap.ceda.ac.uk/badc/cmip6/data/CMIP6/ScenarioMIP/MOHC/UKESM1-0-LL/ssp585/r1i1p1f2/Amon/tasmax/gn/files/d20190726/tasmax_Amon_UKESM1-0-LL_ssp585_r1i1p1f2_gn_205001-210012.nc?download=1"
+    }
+  ]
+}

@@ -118,30 +118,28 @@ A systematic multimodel comparison of G6solar and G6sulfur over the Southeast Un
 
 ## 9. Current SRM Regional Impact Explorer results
 
-The current project checkpoint evaluates monthly maximum near-surface air temperature (`tasmax`) from two GeoMIP models for 2071–2100.
+The Phase 3 checkpoint evaluates monthly maximum near-surface air temperature (`tasmax`) from four matched GeoMIP models for 2071–2100: CNRM-ESM2-1, IPSL-CM6A-LR, MPI-ESM1-2-LR, and UKESM1-0-LL.
 
-For the Southeast U.S. analysis region, the two-model JJA mean difference relative to SSP5-8.5 is approximately:
+For the Southeast U.S. analysis region, the four-model JJA mean difference relative to SSP5-8.5 is approximately:
 
-| Experiment | JJA `tasmax` difference |
-| ---------- | ----------------------: |
-| G6solar    |                -2.09 °C |
-| G6sulfur   |                -1.72 °C |
+| Experiment | JJA `tasmax` difference | Model range | Sign agreement |
+| ---------- | ----------------------: | ----------: | -------------: |
+| G6solar    |                -2.14 °C | -2.67 to -1.71 °C | 100% |
+| G6sulfur   |                -1.84 °C | -2.49 to -1.42 °C | 100% |
 
-Both models currently included in the project produce stronger JJA cooling under G6solar than G6sulfur.
+The four-model mean G6solar-minus-G6sulfur JJA difference is -0.30 °C, with individual-model values from -0.40 to -0.18 °C. All four models therefore give a more negative JJA response under G6solar in this regional calculation.
 
-The difference should not yet be interpreted as a robust ensemble result. Two models are insufficient to characterize GeoMIP uncertainty, and published G6 research demonstrates substantial inter-model differences in regional response [2,3].
-
-The current result instead serves as a reproducibility and methodological checkpoint supporting expansion to a larger multimodel ensemble.
+The agreement is season-dependent. MAM splits two models on each sign of the G6solar-minus-G6sulfur difference, and DJF G6sulfur includes one model with warming relative to SSP5-8.5. The result should therefore be interpreted narrowly rather than as a general ranking of intervention mechanisms. The Phase 3 checkpoint reports individual models, spread, counts, and sign agreement so disagreement remains visible.
 
 ## 10. Research direction
 
 The literature suggests several priorities for developing the SRM Regional Impact Explorer.
 
-### 10.1 Expand the model ensemble
+### 10.1 Maintain a defensible model ensemble
 
-Model disagreement is itself an important characteristic of SRM projections. The immediate priority is therefore to expand the number of models before drawing conclusions about the magnitude of the G6solar-G6sulfur difference.
+Model disagreement is itself an important characteristic of SRM projections. Phase 3 expands the direct comparison to four models while excluding models that lack a usable matched `tasmax` triplet. Future additions should be made only when their exact variants, grids, parent branches, coverage, and provenance support a defensible direct comparison.
 
-Results should preserve individual model identity and report model spread rather than presenting an ensemble mean alone.
+Results should continue to preserve individual model identity and report model spread, count, and sign agreement rather than presenting an ensemble mean alone.
 
 ### 10.2 Add precipitation
 
@@ -226,7 +224,7 @@ Instead, it addresses a scientific question that remains relevant regardless of 
 
 ## Suggested citation of this project
 
-Lewis, A. (2026). *SRM Regional Impact Explorer: Regional climate-impact analysis for solar radiation modification*. GitHub repository. Version 0.2 development release.
+Lewis, A. (2026). *SRM Regional Impact Explorer: Regional climate-impact analysis for solar radiation modification*. GitHub repository. Version 0.3 Phase 3 release.
 
 ---
 

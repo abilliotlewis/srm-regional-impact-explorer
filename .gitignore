@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 data/raw/
 data/processed/regional_metrics.csv
+data/processed/*.csv
 docs/demo_preview.png
 *.nc
 *.zarr/

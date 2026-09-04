@@ -15,6 +15,17 @@ if not DATA_PATH.exists():
     DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
     build_demo_data().to_csv(DATA_PATH, index=False)
 DATA = load_metrics(DATA_PATH)
+SCENARIOS = sorted(DATA["scenario"].unique().tolist())
+METRICS = sorted(DATA["metric"].unique().tolist())
+SEASONS = [s for s in ["ANN", "DJF", "MAM", "JJA", "SON"] if s in set(DATA["season"])]
+DEFAULT_SCENARIO = "G6solar" if "G6solar" in SCENARIOS else SCENARIOS[0]
+DEFAULT_METRIC = "tasmax_mean" if "tasmax_mean" in METRICS else METRICS[0]
+DEFAULT_SEASON = "JJA" if "JJA" in SEASONS else SEASONS[0]
+INITIAL_PROVENANCE = (
+    "**SYNTHETIC DEMONSTRATION DATA. These values are interface test data, not climate projections.**"
+    if bool(DATA["is_demo"].all())
+    else f"**Model-derived records for {DATA['period'].iloc[0]}. See the source manifest and result note for provenance and limitations.**"
+)
 
 
 def update(scenario: str, metric: str, season: str, mode: str):
@@ -29,17 +40,15 @@ with gr.Blocks(title="SRM Regional Impact Explorer") as demo:
         "Compare regional climate indicators under solar-irradiance reduction, "
         "stratospheric aerosol intervention, and emissions scenarios."
     )
-    provenance = gr.Markdown(
-        "**SYNTHETIC DEMONSTRATION DATA. These values are interface test data, not climate projections.**"
-    )
+    provenance = gr.Markdown(INITIAL_PROVENANCE)
     with gr.Row():
         scenario = gr.Dropdown(
-            ["ssp585", "ssp245", "G6solar", "G6sulfur"], value="G6solar", label="Scenario"
+            SCENARIOS, value=DEFAULT_SCENARIO, label="Scenario"
         )
         metric = gr.Dropdown(
-            ["tasmax_mean", "pr_mean", "rx1day", "cdd"], value="tasmax_mean", label="Metric"
+            METRICS, value=DEFAULT_METRIC, label="Metric"
         )
-        season = gr.Dropdown(["ANN", "DJF", "MAM", "JJA", "SON"], value="JJA", label="Season")
+        season = gr.Dropdown(SEASONS, value=DEFAULT_SEASON, label="Season")
         mode = gr.Radio(
             ["Difference from SSP5-8.5", "Absolute ensemble mean"],
             value="Difference from SSP5-8.5",

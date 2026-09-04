@@ -1,0 +1,65 @@
+{
+  "manifest_version": 1,
+  "created_utc": "2026-09-04",
+  "project": "CMIP6",
+  "source_id": "IPSL-CM6A-LR",
+  "variable_id": "tasmax",
+  "table_id": "Amon",
+  "license": "CC BY 4.0",
+  "analysis_period": "2071-2100",
+  "records": [
+    {
+      "dataset_key": "IPSL-CM6A-LR.G6solar.r1i1p1f1.Amon.tasmax.gr.v20200723",
+      "activity_id": "GeoMIP",
+      "experiment_id": "G6solar",
+      "institution_id": "IPSL",
+      "variant_label": "r1i1p1f1",
+      "grid_label": "gr",
+      "version": "v20200723",
+      "filename": "tasmax_Amon_IPSL-CM6A-LR_G6solar_r1i1p1f1_gr_202001-210012.nc",
+      "size_bytes": 49987821,
+      "sha256": "c93b49350a689edd6d01f0f50ecb7bc02c1b2c9e5d6b3b7cce46273eee1b4321",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/GeoMIP/IPSL/IPSL-CM6A-LR/G6solar/r1i1p1f1/Amon/tasmax/gr/v20200723/tasmax_Amon_IPSL-CM6A-LR_G6solar_r1i1p1f1_gr_202001-210012.nc"
+    },
+    {
+      "dataset_key": "IPSL-CM6A-LR.G6sulfur.r1i1p1f1.Amon.tasmax.gr.v20200709",
+      "activity_id": "GeoMIP",
+      "experiment_id": "G6sulfur",
+      "institution_id": "IPSL",
+      "variant_label": "r1i1p1f1",
+      "grid_label": "gr",
+      "version": "v20200709",
+      "filename": "tasmax_Amon_IPSL-CM6A-LR_G6sulfur_r1i1p1f1_gr_202001-210012.nc",
+      "size_bytes": 49566996,
+      "sha256": "80c75f6c4d2bc3c9364adac34465d3c006267878b0579929f3750cd53f799d6f",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/GeoMIP/IPSL/IPSL-CM6A-LR/G6sulfur/r1i1p1f1/Amon/tasmax/gr/v20200709/tasmax_Amon_IPSL-CM6A-LR_G6sulfur_r1i1p1f1_gr_202001-210012.nc"
+    },
+    {
+      "dataset_key": "IPSL-CM6A-LR.ssp585.r1i1p1f1.Amon.tasmax.gr.v20190903",
+      "activity_id": "ScenarioMIP",
+      "experiment_id": "ssp585",
+      "institution_id": "IPSL",
+      "variant_label": "r1i1p1f1",
+      "grid_label": "gr",
+      "version": "v20190903",
+      "filename": "tasmax_Amon_IPSL-CM6A-LR_ssp585_r1i1p1f1_gr_201501-210012.nc",
+      "size_bytes": 49328739,
+      "sha256": "df82a4dcbdff3527cd9e0ec19ae549fac29987c1c7449fa19f9de4d54283923f",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/ScenarioMIP/IPSL/IPSL-CM6A-LR/ssp585/r1i1p1f1/Amon/tasmax/gr/v20190903/tasmax_Amon_IPSL-CM6A-LR_ssp585_r1i1p1f1_gr_201501-210012.nc"
+    },
+    {
+      "dataset_key": "IPSL-CM6A-LR.ssp245.r1i1p1f1.Amon.tasmax.gr.v20190119",
+      "activity_id": "ScenarioMIP",
+      "experiment_id": "ssp245",
+      "institution_id": "IPSL",
+      "variant_label": "r1i1p1f1",
+      "grid_label": "gr",
+      "version": "v20190119",
+      "filename": "tasmax_Amon_IPSL-CM6A-LR_ssp245_r1i1p1f1_gr_201501-210012.nc",
+      "size_bytes": 49370595,
+      "sha256": "6c16ba862bdba35fdc9ce3a6c1f56e7e5ace844f2547557ac4fc6f19fb2759b6",
+      "url": "https://esgf-node.ornl.gov/thredds/fileServer/css03_data/CMIP6/ScenarioMIP/IPSL/IPSL-CM6A-LR/ssp245/r1i1p1f1/Amon/tasmax/gr/v20190119/tasmax_Amon_IPSL-CM6A-LR_ssp245_r1i1p1f1_gr_201501-210012.nc"
+    }
+  ]
+}
+

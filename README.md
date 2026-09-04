@@ -8,9 +8,17 @@ The first scientific question is:
 
 ## Current status
 
-The included dataset is a **synthetic demonstration dataset**. It exists only to test the data schema, analysis functions, charts, and interface. It must not be interpreted as a climate projection or research result.
+Phase 1 now has a reproducible, model-derived result from official ESGF-hosted data. The first comparison uses monthly `tasmax` from IPSL-CM6A-LR for 2071–2100. Raw NetCDF files and the generated analysis table stay outside Git, while the exact source URLs, versions, byte counts, and SHA-256 checksums are versioned in the repository.
 
-The project is designed so the demonstration CSV can later be replaced with processed GeoMIP/CMIP6 output while keeping the explorer unchanged.
+The repository retains a deterministic synthetic-data generator for interface tests. The app clearly identifies whether its active records are synthetic or model-derived.
+
+## First result
+
+For the IPSL-CM6A-LR `r1i1p1f1` realization, the 2071–2100 JJA area-weighted box-mean `tasmax` difference from SSP5-8.5 is -2.24 °C under G6solar and -1.90 °C under G6sulfur. This one-model result is a pipeline milestone, not a robust multi-model conclusion.
+
+![G6solar and G6sulfur JJA tasmax differences from SSP5-8.5](docs/phase1_tasmax_jja.png)
+
+See [the Phase 1 result note](docs/PHASE1_RESULT.md) for method, provenance, and limitations.
 
 ## Scenarios
 
@@ -33,7 +41,7 @@ python -m pip install -r requirements.txt
 python app.py
 ```
 
-The app creates the deterministic demonstration CSV automatically when it is missing. Run `python scripts/generate_demo_data.py` directly when you want to regenerate it before launching the app.
+The app uses the real processed table when present. If it is missing, the app creates a deterministic demonstration CSV automatically. Run `python scripts/generate_demo_data.py` directly when you want to regenerate the demonstration data.
 
 Run tests:
 
@@ -43,11 +51,22 @@ pytest
 
 ## Replace the demonstration data
 
-1. Download monthly or daily GeoMIP/CMIP6 files from an ESGF node for `ssp585`, `ssp245`, `G6solar`, and `G6sulfur`.
-2. Place files under `data/raw/<scenario>/<model>/`.
-3. Use `scripts/prepare_geomip.py` to convert gridded climatologies to the explorer schema.
-4. Write the combined file to `data/processed/regional_metrics.csv`.
-5. Set `is_demo` to `false` for verified model-derived records.
+The first real-data manifest contains matched monthly `tasmax` files for IPSL-CM6A-LR. Download, verify, and process them with:
+
+```bash
+python scripts/build_phase1.py --download
+python scripts/make_phase1_figure.py
+```
+
+The downloader validates every file against its official ESGF byte count and SHA-256 checksum before the analysis begins. Raw NetCDF and derived CSV files remain untracked by Git.
+
+For other models or variables:
+
+1. Resolve exact files and checksums through the ESGF Search API.
+2. Add a versioned manifest under `data/manifests/`.
+3. Place downloaded files under `data/raw/`.
+4. Use `scripts/prepare_geomip.py` to convert gridded climatologies to the explorer schema.
+5. Write the combined file to `data/processed/regional_metrics.csv` with `is_demo=false`.
 
 See [docs/DATA_PLAN.md](docs/DATA_PLAN.md) for variables, time periods, quality checks, and publication criteria.
 
@@ -58,8 +77,12 @@ app.py                         Gradio application
 src/srm_explorer/analysis.py  Data loading, validation, summaries, plots
 scripts/generate_demo_data.py Deterministic demonstration data generator
 scripts/prepare_geomip.py     NetCDF-to-explorer preprocessing starter
+scripts/download_manifest.py  Checksum-verifying ESGF downloader
+scripts/build_phase1.py        First IPSL real-data build
+data/manifests/                Versioned source records and checksums
 data/processed/               Generated or explorer-ready tables
 docs/DATA_PLAN.md             Real-data acquisition and validation plan
+docs/PHASE1_RESULT.md         First result, method, and limitations
 tests/                         Automated checks
 ```
 

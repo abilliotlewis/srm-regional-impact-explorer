@@ -2,7 +2,7 @@
 
 ## Current publishable question
 
-How do `G6solar` and `G6sulfur` differ from `ssp585` in late-century Southeast U.S. seasonal temperature and precipitation, and how consistent are those differences across a fixed matched-model sample?
+How do `G6solar` and `G6sulfur` differ from `ssp585` in late-century Southeast U.S. daily heat, heavy-precipitation, and dry-spell behavior?
 
 ## Current scope
 
@@ -10,8 +10,9 @@ How do `G6solar` and `G6sulfur` differ from `ssp585` in late-century Southeast U
 - Future climatology: 2071–2100
 - Direct-comparison scenarios: `ssp585`, `G6solar`, `G6sulfur`
 - Seasons: annual, DJF, MAM, JJA, SON
-- Variables completed: monthly `tasmax` and `pr`
-- Fixed sample: CNRM-ESM2-1, IPSL-CM6A-LR, MPI-ESM1-2-LR, and UKESM1-0-LL using the exact variants and grids in the Phase 3 and Phase 4 selection logs
+- Variables completed: monthly and daily `tasmax` and `pr`
+- Phase 5 daily sample: MPI-ESM1-2-LR `r2i1p1f1` on `gn`, the only audited complete matched daily set
+- Historical threshold period: 1981-2010 from the same MPI-ESM1-2-LR member and grid
 
 ## Phase roadmap
 
@@ -21,7 +22,7 @@ How do `G6solar` and `G6sulfur` differ from `ssp585` in late-century Southeast U
 | 2 | Two-model monthly `tasmax` comparison | Historical checkpoint |
 | 3 | Defensible four-model monthly `tasmax` ensemble | Complete |
 | 4 | Monthly `pr` for the same matched four-model sample | Complete |
-| 5 | Daily temperature and precipitation extremes | Later work |
+| 5 | TXx, TX90 heatwaves, Rx1day, Rx5day, CDD, and R95pTOT | Complete, single-model checkpoint |
 | 6 | Predefined subregional analysis | Later work |
 | 7 | Spatial agreement and uncertainty maps | Later work |
 
@@ -32,7 +33,11 @@ How do `G6solar` and `G6sulfur` differ from `ssp585` in late-century Southeast U
 | Mean maximum temperature | `tasmax` | monthly or daily | Convert K to °C, seasonal mean |
 | Mean precipitation | `pr` | monthly or daily | Convert kg m-2 s-1 to mm/day, seasonal mean |
 | Maximum one-day rain | `pr` | daily | Annual or seasonal maximum |
+| Maximum five-day rain | `pr` | daily | Maximum consecutive five-day total |
 | Consecutive dry days | `pr` | daily | Maximum run with precipitation below 1 mm/day |
+| Very-wet-day total | `pr` | daily | Total above the historical wet-day 95th percentile |
+| TXx | `tasmax` | daily | Annual or seasonal maximum |
+| TX90 heatwaves | `tasmax` | daily | Events, participating days, and longest duration above calendar-day TX90 |
 
 ## Model-selection rules
 

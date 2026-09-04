@@ -16,7 +16,9 @@ This repository defines a reproducible workflow for regional climatologies deriv
 
 ## Current release status
 
-The Phase 4 model-derived build covers monthly `tasmax` and precipitation (`pr`) from CNRM-ESM2-1 `r1i1p1f2`, IPSL-CM6A-LR `r1i1p1f1`, MPI-ESM1-2-LR `r2i1p1f1`, and UKESM1-0-LL `r1i1p1f2` for G6solar, G6sulfur, and SSP5-8.5 during 2071–2100. The same model, member, and grid sample is used for both variables. The gridded derived CSV is generated locally and is not committed to Git. Compact per-model and ensemble regional tables are versioned under `docs/`. Exact source records and checksums are stored under `data/manifests/`.
+The Phase 5 model-derived build adds daily extremes from MPI-ESM1-2-LR `r2i1p1f1` on `gn` for G6solar, G6sulfur, and SSP5-8.5 during 2071-2100. Historical data from 1981-2010 supply model-specific percentile thresholds. Metrics include TXx, TX90 heatwave event count, heatwave days, longest heatwave duration, Rx1day, Rx5day, consecutive dry days, and R95pTOT. The federated availability audit found only this one complete matched daily model, so the daily result does not represent an ensemble.
+
+The build retains the Phase 4 monthly `tasmax` and `pr` sample from CNRM-ESM2-1, IPSL-CM6A-LR, MPI-ESM1-2-LR, and UKESM1-0-LL. The gridded derived CSV is generated locally and is not committed to Git. Compact regional tables are versioned under `docs/`, and exact source records and checksums are stored under `data/manifests/`.
 
 Source licenses differ by institution. CNRM-CERFACS and IPSL files state CC BY-NC-SA 4.0; MPI-M and MOHC files state CC BY-SA 4.0. Consult each manifest and the NetCDF global attributes before redistribution.
 
@@ -44,3 +46,5 @@ Records generated from `scripts/generate_demo_data.py` have `is_demo=true` and `
 ## Limitations
 
 G6solar is an idealized solar-irradiance experiment. It is useful for studying Earth-system response to reduced incoming sunlight, but it does not represent the engineering, orbital geometry, control behavior or failure modes of a particular satellite-mirror design.
+
+The daily-extremes release contains one model and one ensemble member. It cannot quantify structural model uncertainty, internal variability, statistical significance, or observational bias. Seasonal spells and five-day windows are truncated at period boundaries.

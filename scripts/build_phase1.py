@@ -86,7 +86,7 @@ def validate_provenance(
                 "variant_label": record["variant_label"],
                 "grid_label": record["grid_label"],
             }
-            if experiment_id.startswith("G6"):
+            if metadata.get("parent_experiment_id"):
                 expected.update(
                     {
                         "parent_experiment_id": metadata["parent_experiment_id"],

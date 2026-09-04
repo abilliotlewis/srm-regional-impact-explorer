@@ -35,6 +35,12 @@ METRIC_LABELS = {
     "pr_mean": "Mean precipitation rate",
     "rx1day": "Maximum one-day precipitation",
     "cdd": "Consecutive dry days",
+    "txx": "Maximum daily maximum temperature",
+    "hwn_tx90_3d": "Heatwave event count (TX90, 3-day minimum)",
+    "hwf_tx90_3d": "Heatwave days (TX90, 3-day minimum)",
+    "hwd_tx90_3d": "Longest heatwave duration (TX90, 3-day minimum)",
+    "rx5day": "Maximum consecutive five-day precipitation",
+    "r95ptot": "Very-wet-day precipitation total",
 }
 
 

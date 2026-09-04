@@ -115,3 +115,22 @@ def test_model_identity_helper_preserves_variant_and_grid():
         }
     )
     assert model_identities(frame) == {("TEST", "r1", "gn"), ("TEST", "r2", "gn")}
+
+
+def test_phase5_daily_manifests_use_exact_phase4_mpi_member():
+    for variable in ("tasmax", "pr"):
+        path = ROOT / "data" / "manifests" / f"mpi_lr_{variable}_day.json"
+        manifest = load_manifest(path)
+        validate_matched_experiments(manifest)
+        assert manifest["variable_id"] == variable
+        assert manifest["table_id"] == "day"
+        assert manifest["baseline_period"] == "1981-2010"
+        assert len(manifest["records"]) == 12
+        assert {record["experiment_id"] for record in manifest["records"]} == {
+            "historical",
+            "ssp585",
+            "G6solar",
+            "G6sulfur",
+        }
+        assert all(record["variant_label"] == "r2i1p1f1" for record in manifest["records"])
+        assert all(record["grid_label"] == "gn" for record in manifest["records"])

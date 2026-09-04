@@ -4,21 +4,25 @@ An open, reproducible starter project for comparing regional climate responses u
 
 The current scientific question is:
 
-> How do G6solar and G6sulfur differ in their late-century Southeast U.S. temperature and precipitation responses, and how consistently do matched models show those differences?
+> Do G6solar and G6sulfur produce different late-century Southeast U.S. daily heat, heavy-rainfall, and dry-spell responses relative to SSP5-8.5?
 
 ## Current status
 
-Phase 4 provides a reproducible four-model checkpoint from official CMIP6 archive data. The matched comparison uses monthly `tasmax` and precipitation (`pr`) from CNRM-ESM2-1, IPSL-CM6A-LR, MPI-ESM1-2-LR, and UKESM1-0-LL for 2071–2100. The exact model, member, and grid sample is held fixed across variables. Raw NetCDF files and the generated gridded analysis table stay outside Git, while exact source URLs, versions, tracking IDs, byte counts, SHA-256 checksums, licenses, variants, grids, and parent-run metadata are versioned in the repository.
+Phase 5 provides a reproducible daily-extremes checkpoint from official CMIP6 archive data. The direct comparison uses daily `tasmax` and `pr` from MPI-ESM1-2-LR `r2i1p1f1` on its native `gn` grid for 2071-2100, with 1981-2010 historical data for percentile thresholds. It covers TXx, heatwave event count, heatwave frequency and duration, Rx1day, Rx5day, consecutive dry days, and R95pTOT. A federated archive audit found no second model with the complete matched daily experiment set, so Phase 5 is explicitly a single-model checkpoint, not an ensemble result.
+
+Raw NetCDF files and the generated gridded analysis table stay outside Git. Exact source URLs, versions, tracking IDs, byte counts, SHA-256 checksums, licenses, variants, grids, and parent-run metadata are versioned in the repository.
 
 The repository retains a deterministic synthetic-data generator for interface tests. The app clearly identifies whether its active records are synthetic or model-derived.
 
 ## Current result
 
-For the four-model mean, the 2071–2100 JJA area-weighted precipitation difference from SSP5-8.5 is +0.204 mm/day under G6solar and +0.081 mm/day under G6sulfur. All four models are wetter under G6solar. G6sulfur splits two wetter and two drier. The mean G6solar-minus-G6sulfur difference is +0.123 mm/day, with individual models ranging from -0.117 to +0.242 mm/day and three of four agreeing on the positive sign.
+In MPI-ESM1-2-LR, annual TXx is 1.986°C lower under G6solar and 1.651°C lower under G6sulfur relative to SSP5-8.5. G6solar also has 46.689 fewer annual heatwave days and a 10.684-day shorter longest annual heatwave than G6sulfur.
 
-![Four-model JJA regional precipitation comparison](docs/phase4_pr_ensemble.png)
+The hydroclimate result is less uniform. Relative to SSP5-8.5, both interventions reduce annual Rx1day, Rx5day, and R95pTOT in this run, with larger reductions under G6sulfur. G6solar has shorter dry spells than G6sulfur in every season, but the G6solar-minus-G6sulfur Rx5day difference reverses sign in JJA. Near-zero JJA Rx1day and R95pTOT differences provide little separation between interventions.
 
-This is a matched four-model result, not a general conclusion about SRM. Seasonal precipitation ordering varies, and every season except the annual mean contains at least one model with the opposite G6solar-minus-G6sulfur sign. See [the Phase 4 checkpoint](docs/PHASE4_CHECKPOINT.md) for every seasonal statistic and limitation, and [the Phase 4 model-selection log](docs/PHASE4_MODEL_SELECTION.md) for the fixed-sample decision. The [Phase 3 checkpoint](docs/PHASE3_CHECKPOINT.md) remains the temperature checkpoint, and [Phase 2](docs/PHASE2_CHECKPOINT.md) remains the historical two-model result.
+![Daily heat-extreme responses](docs/phase5_heat_extremes.png)
+
+See [the Phase 5 checkpoint](docs/PHASE5_CHECKPOINT.md) for definitions, every seasonal comparison, validation, and limitations, and [the Phase 5 model-selection log](docs/PHASE5_MODEL_SELECTION.md) for the archive audit. [Phase 4](docs/PHASE4_CHECKPOINT.md) remains the matched four-model monthly precipitation checkpoint, [Phase 3](docs/PHASE3_CHECKPOINT.md) remains the matched four-model temperature checkpoint, and [Phase 2](docs/PHASE2_CHECKPOINT.md) remains the historical two-model result.
 
 ## Current experiments
 
@@ -26,12 +30,20 @@ This is a matched four-model result, not a general conclusion about SRM. Seasona
 - `G6solar`: solar-irradiance reduction against the SSP5-8.5 background
 - `G6sulfur`: stratospheric sulfate intervention against the SSP5-8.5 background
 
-The deterministic demonstration generator and historical temperature manifests also retain `ssp245`, but it is not part of the Phase 4 direct comparison.
+The deterministic demonstration generator and historical temperature manifests also retain `ssp245`, but it is not part of the Phase 5 direct comparison.
 
-## Current metric
+## Current metrics
 
 - `tasmax_mean`: mean daily maximum near-surface air temperature
 - `pr_mean`: mean precipitation rate
+- `txx`: maximum daily maximum temperature
+- `hwn_tx90_3d`: heatwave event count above historical TX90, three-day minimum
+- `hwf_tx90_3d`: days participating in those heatwaves
+- `hwd_tx90_3d`: longest qualifying heatwave
+- `rx1day`: maximum one-day precipitation
+- `rx5day`: maximum consecutive five-day precipitation
+- `cdd`: maximum consecutive dry days below 1 mm/day
+- `r95ptot`: precipitation on days above the historical wet-day 95th percentile
 
 ## Quick start
 
@@ -50,12 +62,13 @@ pytest
 
 ## Replace the demonstration data
 
-The real-data manifests contain the matched monthly `tasmax` and `pr` files used for the four-model Phase 4 ensemble. Download, verify, process, and reproduce the tables and figures with:
+The real-data manifests contain the matched monthly Phase 4 files and the daily MPI-ESM1-2-LR files used for Phase 5. Download, verify, process, and reproduce the current tables and figures with:
 
 ```bash
-python scripts/build_phase4.py --download
+python scripts/build_phase5.py --download
 python scripts/make_phase3_outputs.py
 python scripts/make_phase4_outputs.py
+python scripts/make_phase5_outputs.py
 ```
 
 The downloader validates every file against its recorded byte count and SHA-256 checksum before the analysis begins. The build also checks embedded experiment, model, variant, grid, tracking, and parent metadata. Raw NetCDF and the gridded processed CSV remain untracked by Git; compact regional result tables are versioned under `docs/`.
@@ -80,8 +93,11 @@ scripts/prepare_geomip.py     NetCDF-to-explorer preprocessing starter
 scripts/download_manifest.py  Checksum-verifying ESGF downloader
 scripts/build_phase1.py        Reusable single-variable validated build
 scripts/build_phase4.py        Matched two-variable Phase 4 build
+scripts/build_phase5.py        Matched daily-extremes Phase 5 build
+scripts/prepare_daily_extremes.py Daily index calculation on native grids
 scripts/make_phase3_outputs.py Phase 3 regional tables and figures
 scripts/make_phase4_outputs.py Phase 4 precipitation tables and figures
+scripts/make_phase5_outputs.py Phase 5 extremes table and figures
 data/manifests/                Versioned source records and checksums
 data/processed/               Generated or explorer-ready tables
 docs/DATA_PLAN.md             Real-data acquisition and validation plan
@@ -91,6 +107,8 @@ docs/PHASE3_MODEL_SELECTION.md Model inclusion and exclusion audit
 docs/PHASE3_CHECKPOINT.md      Four-model results, uncertainty, and limits
 docs/PHASE4_MODEL_SELECTION.md Precipitation selection and provenance audit
 docs/PHASE4_CHECKPOINT.md      Matched precipitation results and uncertainty
+docs/PHASE5_MODEL_SELECTION.md Daily-data selection and exclusion audit
+docs/PHASE5_CHECKPOINT.md      Daily-extremes result and limitations
 tests/                         Automated checks
 ```
 
@@ -99,6 +117,7 @@ tests/                         Automated checks
 - Always display whether records are synthetic or model-derived.
 - Preserve model identity instead of presenting an ensemble mean alone.
 - Report spread and model count with every multi-model result.
+- Label single-model results explicitly and do not calculate meaningless ensemble spread.
 - Match variants and parent branches explicitly; never substitute an ensemble member silently.
 - Calculate regional means on native grids before combining models.
 - Do not treat `G6solar` as a complete engineering representation of satellite mirrors. It is a climate-model experiment based on reduced solar irradiance.

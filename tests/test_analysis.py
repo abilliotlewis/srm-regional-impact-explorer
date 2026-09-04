@@ -192,3 +192,36 @@ def test_phase4_published_summary_has_complete_four_model_counts():
         & (summary.comparison == "G6sulfur - SSP5-8.5")
     ].iloc[0]
     assert jja_sulfur.sign_agreement == 0.5
+
+
+def test_phase5_published_daily_results_are_complete_and_single_model():
+    results = pd.read_csv(ROOT / "docs" / "phase5_daily_extremes.csv")
+    assert len(results) == 120
+    assert set(results.model) == {"MPI-ESM1-2-LR"}
+    assert set(results.variant_label) == {"r2i1p1f1"}
+    assert set(results.grid_label) == {"gn"}
+    assert set(results.season) == {"ANN", "DJF", "MAM", "JJA", "SON"}
+    assert set(results.metric) == {
+        "txx",
+        "hwn_tx90_3d",
+        "hwf_tx90_3d",
+        "hwd_tx90_3d",
+        "rx1day",
+        "rx5day",
+        "cdd",
+        "r95ptot",
+    }
+    assert set(results.comparison) == {
+        "G6solar - SSP5-8.5",
+        "G6sulfur - SSP5-8.5",
+        "G6solar - G6sulfur",
+    }
+    assert not results.value.isna().any()
+    assert not results.duplicated(["model", "season", "metric", "comparison"]).any()
+
+    annual_txx = results[
+        (results.season == "ANN")
+        & (results.metric == "txx")
+        & (results.comparison == "G6solar - G6sulfur")
+    ].value.iloc[0]
+    assert np.isclose(annual_txx, -0.335221, atol=1e-6)

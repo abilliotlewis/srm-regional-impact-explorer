@@ -43,6 +43,61 @@ METRIC_LABELS = {
     "r95ptot": "Very-wet-day precipitation total",
 }
 
+COMPARISON_LABELS = {
+    "G6solar - SSP5-8.5": "G6solar minus SSP5-8.5",
+    "G6sulfur - SSP5-8.5": "G6sulfur minus SSP5-8.5",
+    "G6solar - G6sulfur": "G6solar minus G6sulfur",
+}
+
+
+def available_phase6_selections(frame: pd.DataFrame) -> list[tuple[str, str, str, str]]:
+    """Return only model, metric, season, comparison combinations in the data."""
+    required = {"model", "metric", "season", "comparison", "value"}
+    missing = required.difference(frame.columns)
+    if missing:
+        raise ValueError(f"Missing Phase 6 explorer columns: {sorted(missing)}")
+    return sorted(
+        frame[["model", "metric", "season", "comparison"]]
+        .drop_duplicates()
+        .itertuples(index=False, name=None)
+    )
+
+
+def phase6_selection(frame, model, metric, season, comparison):
+    available = set(available_phase6_selections(frame))
+    key = (model, metric, season, comparison)
+    if key not in available:
+        raise ValueError(f"Unavailable Phase 6 selection: {key}")
+    return frame[
+        (frame.model == model) & (frame.metric == metric)
+        & (frame.season == season) & (frame.comparison == comparison)
+    ].copy()
+
+
+def make_phase6_map(frame, model, metric, season, comparison):
+    selected = phase6_selection(frame, model, metric, season, comparison)
+    pivot = selected.pivot(index="lat", columns="lon", values="value").sort_index()
+    bound = float(np.nanmax(np.abs(pivot.values)))
+    fig, ax = plt.subplots(figsize=(8.2, 5.1), constrained_layout=True)
+    mesh = ax.pcolormesh(pivot.columns, pivot.index, pivot.values, shading="nearest",
+                         cmap="RdBu_r", vmin=-bound, vmax=bound)
+    fig.colorbar(mesh, ax=ax, label=selected.units.iloc[0])
+    ax.set(xlabel="Longitude", ylabel="Latitude",
+           title=f"{model} | {METRIC_LABELS.get(metric, metric)}\n{season}, {COMPARISON_LABELS.get(comparison, comparison)}")
+    ax.grid(alpha=.18)
+    return fig
+
+
+def summarize_phase6_selection(frame, model, metric, season, comparison):
+    selected = phase6_selection(frame, model, metric, season, comparison)
+    units = selected.units.iloc[0]
+    mean=np.average(selected.value,weights=selected.weight)
+    summary = pd.DataFrame({"Statistic":["Area-weighted map mean","Map-cell minimum","Map-cell maximum","Model count"],
+                            "Value":[f"{mean:.3f} {units}",f"{selected.value.min():.3f} {units}",f"{selected.value.max():.3f} {units}",str(int(selected.model_count.iloc[0]))]})
+    scope=selected.model_scope.iloc[0]; domain=selected.domain.iloc[0]; period=selected.period.iloc[0]; grid=selected.grid_kind.iloc[0]
+    note=f"**Model-derived Phase 6 result.** {scope}; domain: {domain}; period: {period}; units: {units}; model count: {int(selected.model_count.iloc[0])}; display grid: {grid}."
+    return summary,note
+
 
 def load_metrics(path: str | Path) -> pd.DataFrame:
     frame = pd.read_csv(path)
@@ -184,6 +239,7 @@ def _matched_model_grids(
     direct_parent = (
         (identity["parent_experiment_id"] == reference)
         & (identity["parent_variant_label"] == identity["variant_label_reference"])
+        & (identity["variant_label"] == identity["variant_label_reference"])
     )
     common_parent = (
         (identity["parent_experiment_id"] == identity["parent_experiment_id_reference"])

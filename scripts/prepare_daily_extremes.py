@@ -11,7 +11,7 @@ import xarray as xr
 from xclim.core.calendar import percentile_doy, resample_doy
 from xclim.indices import run_length
 
-from prepare_geomip import convert_units, normalize_longitude
+from prepare_geomip import attach_explicit_coordinate_bounds, convert_units, normalize_longitude
 
 SEASON_MONTHS = {
     "ANN": list(range(1, 13)),
@@ -64,7 +64,8 @@ def validate_daily_coverage(data: xr.DataArray, start_year: int, end_year: int) 
 
 
 def open_daily_region(
-    sources: Sequence[Path], variable: str, start_year: int, end_year: int
+    sources: Sequence[Path], variable: str, start_year: int, end_year: int,
+    spatial_padding_degrees: float = 0.0,
 ) -> xr.DataArray:
     dataset = xr.open_mfdataset(
         [str(path) for path in sources],
@@ -77,10 +78,11 @@ def open_daily_region(
     data = normalize_longitude(dataset[variable])
     data = data.sel(time=slice(str(start_year), str(end_year)))
     validate_daily_coverage(data, start_year, end_year)
-    data = data.where((data.lat >= 24) & (data.lat <= 38), drop=True)
-    data = data.where((data.lon >= -100) & (data.lon <= -74), drop=True)
+    data = data.where((data.lat >= 24 - spatial_padding_degrees) & (data.lat <= 38 + spatial_padding_degrees), drop=True)
+    data = data.where((data.lon >= -100 - spatial_padding_degrees) & (data.lon <= -74 + spatial_padding_degrees), drop=True)
     if data.sizes.get("lat", 0) == 0 or data.sizes.get("lon", 0) == 0:
         raise ValueError("No grid-cell centers fall inside the Southeast U.S. domain")
+    data = attach_explicit_coordinate_bounds(data, dataset)
     # The cropped native-grid subset is small. Materializing it once prevents each
     # annual and seasonal index from rereading the much larger global source files.
     data = data.load()
@@ -149,7 +151,7 @@ def calculate_period_metrics(
     }
 
 
-def calculate_climatologies(
+def calculate_yearly_indices(
     tasmax: xr.DataArray,
     pr: xr.DataArray,
     tx90: xr.DataArray,
@@ -157,7 +159,7 @@ def calculate_climatologies(
     start_year: int,
     end_year: int,
 ) -> dict[tuple[str, str], xr.DataArray]:
-    """Average annual and seasonal index values over complete periods."""
+    """Retain every complete annual and seasonal index before averaging."""
     hot_days = tasmax > resample_doy(tx90, tasmax)
     output: dict[tuple[str, str], xr.DataArray] = {}
     for season in SEASON_MONTHS:
@@ -173,13 +175,39 @@ def calculate_climatologies(
             for metric, values in metrics.items():
                 yearly[metric].append(values.expand_dims(period_year=[period_year]))
         for metric, values in yearly.items():
-            output[(season, metric)] = xr.concat(values, dim="period_year").mean(
-                "period_year"
-            )
+            output[(season, metric)] = xr.concat(values, dim="period_year")
     return output
 
 
-def prepare_daily_extremes(
+def calculate_climatologies(tasmax, pr, tx90, pr95, start_year, end_year):
+    yearly = calculate_yearly_indices(tasmax, pr, tx90, pr95, start_year, end_year)
+    return {key: values.mean("period_year") for key, values in yearly.items()}
+
+
+def _daily_frame(values, scenario, model, variant_label, grid_label,
+                 parent_experiment_id, parent_variant_label, period, calendar,
+                 keep_year):
+    frames = []
+    for (season, metric), data in values.items():
+        table = data.compute().to_dataframe(name="value").reset_index()
+        columns = ["lat", "lon", "value"]
+        bounds = ["lat_lower", "lat_upper", "lon_lower", "lon_upper"]
+        if set(bounds).issubset(table):
+            columns.extend(bounds)
+        if keep_year:
+            columns.insert(0, "period_year")
+        table = table[columns].dropna().assign(
+            model=model, scenario=scenario, variant_label=variant_label,
+            grid_label=grid_label, parent_experiment_id=parent_experiment_id,
+            parent_variant_label=parent_variant_label, season=season,
+            metric=metric, units=METRIC_UNITS[metric], period=period,
+            calendar=calendar, is_demo=False,
+        )
+        frames.append(table)
+    return pd.concat(frames, ignore_index=True)
+
+
+def prepare_daily_outputs(
     tasmax_sources: Sequence[Path],
     pr_sources: Sequence[Path],
     scenario: str,
@@ -192,34 +220,36 @@ def prepare_daily_extremes(
     grid_label: str = "unspecified",
     parent_experiment_id: str = "not_applicable",
     parent_variant_label: str = "not_applicable",
-) -> pd.DataFrame:
-    tasmax = open_daily_region(tasmax_sources, "tasmax", start_year, end_year)
-    pr = open_daily_region(pr_sources, "pr", start_year, end_year)
+    spatial_padding_degrees: float = 0.0,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    tasmax = open_daily_region(tasmax_sources, "tasmax", start_year, end_year, spatial_padding_degrees)
+    pr = open_daily_region(pr_sources, "pr", start_year, end_year, spatial_padding_degrees)
     if not coordinates_match(tasmax.lat, pr.lat) or not coordinates_match(
         tasmax.lon, pr.lon
     ):
         raise ValueError("Daily tasmax and pr grids do not match")
     if not coordinates_match(tasmax.time, pr.time):
         raise ValueError("Daily tasmax and pr calendars do not match")
-    climatologies = calculate_climatologies(
-        tasmax, pr, tx90, pr95, start_year, end_year
+    yearly = calculate_yearly_indices(tasmax, pr, tx90, pr95, start_year, end_year)
+    climatologies = {key: values.mean("period_year") for key, values in yearly.items()}
+    metadata = dict(scenario=scenario, model=model, variant_label=variant_label,
+                    grid_label=grid_label, parent_experiment_id=parent_experiment_id,
+                    parent_variant_label=parent_variant_label,
+                    period=f"{start_year}-{end_year}", calendar=str(tasmax.time.dt.calendar))
+    return (_daily_frame(climatologies, keep_year=False, **metadata),
+            _daily_frame(yearly, keep_year=True, **metadata))
+
+
+def prepare_daily_extremes(
+    tasmax_sources: Sequence[Path], pr_sources: Sequence[Path], scenario: str,
+    model: str, tx90: xr.DataArray, pr95: xr.DataArray, start_year: int = 2071,
+    end_year: int = 2100, variant_label: str = "unspecified",
+    grid_label: str = "unspecified", parent_experiment_id: str = "not_applicable",
+    parent_variant_label: str = "not_applicable", spatial_padding_degrees: float = 0.0,
+) -> pd.DataFrame:
+    climatology, _ = prepare_daily_outputs(
+        tasmax_sources, pr_sources, scenario, model, tx90, pr95, start_year,
+        end_year, variant_label, grid_label, parent_experiment_id,
+        parent_variant_label, spatial_padding_degrees,
     )
-    frames = []
-    for (season, metric), values in climatologies.items():
-        table = values.compute().to_dataframe(name="value").reset_index()
-        table = table[["lat", "lon", "value"]].dropna()
-        table = table.assign(
-            model=model,
-            scenario=scenario,
-            variant_label=variant_label,
-            grid_label=grid_label,
-            parent_experiment_id=parent_experiment_id,
-            parent_variant_label=parent_variant_label,
-            season=season,
-            metric=metric,
-            units=METRIC_UNITS[metric],
-            period=f"{start_year}-{end_year}",
-            is_demo=False,
-        )
-        frames.append(table)
-    return pd.concat(frames, ignore_index=True)
+    return climatology

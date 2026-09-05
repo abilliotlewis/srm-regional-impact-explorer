@@ -1,0 +1,13 @@
+{
+  "docs/phase3_ensemble_summary.csv": "5bd4741c566135812efb131d6a2d9e6113981bf49d5895b61452d0aa73b553e1",
+  "docs/phase3_per_model.csv": "55129482c5a94e2bc2550d257839df161cf523e5342edb74281463105607a633",
+  "docs/phase3_tasmax_ensemble.png": "32a970cd41a7e9743fcdfdabccc1d0bbacae8037f8fae6b04579a4782062f05c",
+  "docs/phase3_tasmax_seasonal.png": "b766dd07b7f3f36f32100d2909463b1c434ff943e39ba67bb0a03383f6c31043",
+  "docs/phase4_ensemble_summary.csv": "fa70882e07ba76b978c87d17b92b7d939cb3956a3e0b3bcb2e4cb2991d6be857",
+  "docs/phase4_per_model.csv": "57420f7c0d7c5ed4d5b152aaa8358de3c369d096a7945a08dff540297c119e5c",
+  "docs/phase4_pr_ensemble.png": "bd6cb1c683aabd2544ca7ba507bfecd60745c0983152b7ce77eaa8cec10367da",
+  "docs/phase4_pr_seasonal.png": "6d16f9d2e119ccbba291ca9438b9b49d08bd8ebc8bbde8d62a42a2714e168a14",
+  "docs/phase5_daily_extremes.csv": "a77ad56851359f8e0584c833a9440b472414bc7ea255065c70bbbfe1e3aa6dad",
+  "docs/phase5_heat_extremes.png": "36d9895cf7781ae555a1ba0cb73466a1c79acc11bd3254017120c80a28ee4fb2",
+  "docs/phase5_hydro_extremes.png": "233905900d42898f69c2d5c69ca69722f5a76eaded67624810e0f240e9528b77"
+}

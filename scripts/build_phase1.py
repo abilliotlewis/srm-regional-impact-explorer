@@ -104,7 +104,8 @@ def validate_provenance(
 
 
 def build_frame(
-    manifest_paths: list[Path], raw_dir: Path, download: bool = False
+    manifest_paths: list[Path], raw_dir: Path, download: bool = False,
+    spatial_padding_degrees: float = 0.0,
 ) -> pd.DataFrame:
     """Build one validated variable table from matched model manifests."""
     frames = []
@@ -149,6 +150,7 @@ def build_frame(
                 parent_variant_label=metadata.get(
                     "parent_variant_label", "not_applicable"
                 ),
+                spatial_padding_degrees=spatial_padding_degrees,
             )
             frame["dataset_key"] = records[0]["dataset_key"]
             frames.append(frame)

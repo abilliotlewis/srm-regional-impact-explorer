@@ -4,6 +4,7 @@ __pycache__/
 data/raw/
 data/processed/regional_metrics.csv
 data/processed/*.csv
+data/processed/*.parquet
 docs/demo_preview.png
 *.nc
 *.zarr/

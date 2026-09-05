@@ -12,6 +12,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 import xarray as xr
 
 SEASON_MONTHS = {
@@ -27,6 +28,29 @@ def normalize_longitude(data: xr.DataArray) -> xr.DataArray:
     if float(data.lon.max()) > 180:
         data = data.assign_coords(lon=((data.lon + 180) % 360) - 180).sortby("lon")
     return data
+
+
+def attach_explicit_coordinate_bounds(data: xr.DataArray, dataset: xr.Dataset) -> xr.DataArray:
+    """Attach one-dimensional source bounds when the NetCDF supplies them."""
+    coordinates: dict[str, tuple[str, np.ndarray]] = {}
+    for coordinate in ("lat", "lon"):
+        bounds_name = dataset[coordinate].attrs.get("bounds")
+        if not bounds_name or bounds_name not in dataset:
+            continue
+        centers = np.asarray(dataset[coordinate].values, dtype=float)
+        bounds = np.asarray(dataset[bounds_name].values, dtype=float)
+        if bounds.ndim != 2 or bounds.shape[0] != centers.size or bounds.shape[1] < 2:
+            continue
+        if coordinate == "lon" and float(np.nanmax(centers)) > 180:
+            centers = ((centers + 180) % 360) - 180
+            bounds = ((bounds + 180) % 360) - 180
+        lookup = {float(center): (float(np.min(edge)), float(np.max(edge))) for center, edge in zip(centers, bounds, strict=True)}
+        active = np.asarray(data[coordinate].values, dtype=float)
+        if not all(float(center) in lookup for center in active):
+            continue
+        coordinates[f"{coordinate}_lower"] = (coordinate, np.array([lookup[float(center)][0] for center in active]))
+        coordinates[f"{coordinate}_upper"] = (coordinate, np.array([lookup[float(center)][1] for center in active]))
+    return data.assign_coords(coordinates)
 
 
 def convert_units(data: xr.DataArray, variable: str) -> tuple[xr.DataArray, str]:
@@ -113,6 +137,7 @@ def prepare(
     grid_label: str = "unspecified",
     parent_experiment_id: str = "not_applicable",
     parent_variant_label: str = "not_applicable",
+    spatial_padding_degrees: float = 0.0,
 ) -> pd.DataFrame:
     sources = [str(path) for path in source] if isinstance(source, Sequence) else str(source)
     dataset = xr.open_mfdataset(
@@ -125,16 +150,21 @@ def prepare(
     data = normalize_longitude(dataset[variable])
     data = data.sel(time=slice(str(start_year), str(end_year)))
     validate_monthly_coverage(data, start_year, end_year)
-    data = data.where((data.lat >= 24) & (data.lat <= 38), drop=True)
-    data = data.where((data.lon >= -100) & (data.lon <= -74), drop=True)
+    data = data.where((data.lat >= 24 - spatial_padding_degrees) & (data.lat <= 38 + spatial_padding_degrees), drop=True)
+    data = data.where((data.lon >= -100 - spatial_padding_degrees) & (data.lon <= -74 + spatial_padding_degrees), drop=True)
     if data.sizes.get("lat", 0) == 0 or data.sizes.get("lon", 0) == 0:
         raise ValueError("No grid-cell centers fall inside the Southeast U.S. domain")
+    data = attach_explicit_coordinate_bounds(data, dataset)
     data, units = convert_units(data, variable)
     frames = []
     for season, months in SEASON_MONTHS.items():
         climatology = seasonal_climatology(data, season, months, start_year, end_year)
         table = climatology.to_dataframe(name="value").reset_index()
-        table = table[["lat", "lon", "value"]].dropna()
+        columns = ["lat", "lon", "value"]
+        bounds = ["lat_lower", "lat_upper", "lon_lower", "lon_upper"]
+        if set(bounds).issubset(table):
+            columns.extend(bounds)
+        table = table[columns].dropna()
         table = table.assign(
             model=model,
             scenario=scenario,

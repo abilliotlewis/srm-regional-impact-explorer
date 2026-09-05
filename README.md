@@ -32,7 +32,7 @@ See [the Phase 7 checkpoint](docs/PHASE7_CHECKPOINT.md) for methods, model-level
 - `G6solar`: solar-irradiance reduction against the SSP5-8.5 background
 - `G6sulfur`: stratospheric sulfate intervention against the SSP5-8.5 background
 
-The deterministic demonstration generator and historical temperature manifests also retain `ssp245`, but it is not part of the Phase 5 direct comparison.
+The deterministic demonstration generator and historical temperature manifests also retain `ssp245`, but it is not part of the current Phase 7 comparison.
 
 ## Current metrics
 

@@ -125,6 +125,105 @@ def seasonal_climatology(
     return (numerator / denominator).mean("season_year")
 
 
+def seasonal_time_series(
+    data: xr.DataArray,
+    season: str,
+    months: list[int],
+    start_year: int,
+    end_year: int,
+) -> xr.DataArray:
+    """Calculate complete, day-weighted seasonal means for every period year."""
+    selected = data.where(data.time.dt.month.isin(months), drop=True)
+    years = selected.time.dt.year.astype(int)
+    if season == "DJF":
+        period_year = years + (selected.time.dt.month == 12).astype(int)
+        first_year = start_year + 1
+    else:
+        period_year = years
+        first_year = start_year
+    period_year = period_year.rename("period_year")
+    keep = (period_year >= first_year) & (period_year <= end_year)
+    selected = selected.where(keep, drop=True)
+    period_year = period_year.where(keep, drop=True)
+
+    counts = xr.ones_like(selected.time, dtype=int).groupby(period_year).sum("time")
+    if not bool((counts == len(months)).all()):
+        raise ValueError(f"{season} contains an incomplete seasonal year")
+
+    weights = selected.time.dt.days_in_month.astype(float)
+    numerator = (selected * weights).groupby(period_year).sum("time")
+    denominator = weights.groupby(period_year).sum("time")
+    return numerator / denominator
+
+
+def prepare_time_series(
+    source: Path | Sequence[Path],
+    scenario: str,
+    model: str,
+    variable: str,
+    metric: str,
+    start_year: int,
+    end_year: int,
+    variant_label: str = "unspecified",
+    grid_label: str = "unspecified",
+    parent_experiment_id: str = "not_applicable",
+    parent_variant_label: str = "not_applicable",
+    spatial_padding_degrees: float = 0.0,
+) -> pd.DataFrame:
+    """Retain native-grid annual and seasonal values before climatological averaging."""
+    sources = [str(path) for path in source] if isinstance(source, Sequence) else str(source)
+    with xr.open_mfdataset(
+        sources,
+        combine="by_coords",
+        data_vars="minimal",
+        coords="minimal",
+        compat="override",
+    ) as dataset:
+        data = normalize_longitude(dataset[variable])
+        data = data.sel(time=slice(str(start_year), str(end_year)))
+        validate_monthly_coverage(data, start_year, end_year)
+        calendar = str(data.time.dt.calendar)
+        data = data.where(
+            (data.lat >= 24 - spatial_padding_degrees)
+            & (data.lat <= 38 + spatial_padding_degrees),
+            drop=True,
+        )
+        data = data.where(
+            (data.lon >= -100 - spatial_padding_degrees)
+            & (data.lon <= -74 + spatial_padding_degrees),
+            drop=True,
+        )
+        if data.sizes.get("lat", 0) == 0 or data.sizes.get("lon", 0) == 0:
+            raise ValueError("No grid-cell centers fall inside the Southeast U.S. domain")
+        data = attach_explicit_coordinate_bounds(data, dataset)
+        data, units = convert_units(data, variable)
+        frames = []
+        for season, months in SEASON_MONTHS.items():
+            seasonal = seasonal_time_series(data, season, months, start_year, end_year)
+            table = seasonal.to_dataframe(name="value").reset_index()
+            columns = ["period_year", "lat", "lon", "value"]
+            bounds = ["lat_lower", "lat_upper", "lon_lower", "lon_upper"]
+            if set(bounds).issubset(table):
+                columns.extend(bounds)
+            table = table[columns].dropna()
+            table = table.assign(
+                model=model,
+                scenario=scenario,
+                variant_label=variant_label,
+                grid_label=grid_label,
+                parent_experiment_id=parent_experiment_id,
+                parent_variant_label=parent_variant_label,
+                season=season,
+                metric=metric,
+                units=units,
+                period=f"{start_year}-{end_year}",
+                calendar=calendar,
+                is_demo=False,
+            )
+            frames.append(table)
+    return pd.concat(frames, ignore_index=True)
+
+
 def prepare(
     source: Path | Sequence[Path],
     scenario: str,

@@ -8,7 +8,7 @@ import pandas as pd
 import xarray as xr
 
 from download_manifest import download_record, load_manifest, validate_file
-from prepare_geomip import prepare
+from prepare_geomip import prepare, prepare_time_series
 
 REQUIRED_EXPERIMENTS = {"G6solar", "G6sulfur", "ssp585"}
 VARIABLE_METRICS = {"tasmax": "tasmax_mean", "pr": "pr_mean"}
@@ -135,6 +135,60 @@ def build_frame(
             if variable not in VARIABLE_METRICS:
                 raise ValueError(f"No explorer metric is defined for variable {variable!r}")
             frame = prepare(
+                source=sources,
+                scenario=experiment_id,
+                model=manifest["source_id"],
+                variable=variable,
+                metric=VARIABLE_METRICS[variable],
+                start_year=2071,
+                end_year=2100,
+                variant_label=records[0]["variant_label"],
+                grid_label=records[0]["grid_label"],
+                parent_experiment_id=metadata.get(
+                    "parent_experiment_id", "not_applicable"
+                ),
+                parent_variant_label=metadata.get(
+                    "parent_variant_label", "not_applicable"
+                ),
+                spatial_padding_degrees=spatial_padding_degrees,
+            )
+            frame["dataset_key"] = records[0]["dataset_key"]
+            frames.append(frame)
+    return pd.concat(frames, ignore_index=True)
+
+
+def build_time_series_frame(
+    manifest_paths: list[Path],
+    raw_dir: Path,
+    download: bool = False,
+    spatial_padding_degrees: float = 0.0,
+) -> pd.DataFrame:
+    """Build validated native-grid seasonal-year fields for matched manifests."""
+    frames = []
+    for manifest_path in manifest_paths:
+        manifest = load_manifest(manifest_path)
+        validate_matched_experiments(manifest)
+        grouped: dict[str, list[dict]] = defaultdict(list)
+        for record in manifest["records"]:
+            if record["experiment_id"] in REQUIRED_EXPERIMENTS:
+                grouped[record["experiment_id"]].append(record)
+
+        for experiment_id, records in grouped.items():
+            sources = []
+            for record in sorted(records, key=lambda item: item["filename"]):
+                source = raw_dir / record["filename"]
+                if download:
+                    source = download_record(record, raw_dir)
+                if not source.exists():
+                    raise FileNotFoundError(
+                        f"Missing {source}. Run with --download or use download_manifest.py first."
+                    )
+                validate_file(source, record)
+                sources.append(source)
+            validate_provenance(sources, records, manifest, experiment_id)
+            metadata = experiment_metadata(manifest, experiment_id)
+            variable = manifest["variable_id"]
+            frame = prepare_time_series(
                 source=sources,
                 scenario=experiment_id,
                 model=manifest["source_id"],

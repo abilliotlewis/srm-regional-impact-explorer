@@ -1,0 +1,31 @@
+name: RTMA 15-minute data October 9-11, 2026
+on:
+  push:
+    branches: [rtma-download-20261009-11]
+    paths:
+      - .github/workflows/rtma-download-20261009-11.yml
+      - tools/rtma_20261009_11.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download, rename, compress, and verify all 193 files
+        run: python3 -u tools/rtma_20261009_11.py
+      - name: Publish one downloadable ZIP
+        id: upload
+        uses: actions/upload-artifact@v7
+        with:
+          path: RTMA_15min_20261009_12Z_to_20261011_12Z.zip
+          archive: false
+          retention-days: 7
+          if-no-files-found: error
+      - name: Record download link
+        env:
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+        run: |
+          printf 'RTMA archive: %s\n\nContains all 193 analyses from 2026-10-09 12Z through 2026-10-11 12Z, inclusive.\n' "$ARTIFACT_URL" >> "$GITHUB_STEP_SUMMARY"

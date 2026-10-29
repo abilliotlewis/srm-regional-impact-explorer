@@ -1,5 +1,11 @@
 # SRM Regional Impact Explorer
 
+## Projects in this repository
+
+- **SRM Regional Impact Explorer**: the solar intervention project described below, with its application and analysis at the repository root.
+- **[Seasonal rainfall research](seasonal-rainfall-research/README.md)**: a separate, exploratory study of repeated extreme rainfall episodes, with its own code, data, results, and report.
+
+
 An open, reproducible starter project for comparing regional climate responses under solar radiation modification scenarios.
 
 The current scientific question is:

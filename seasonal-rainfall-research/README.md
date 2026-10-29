@@ -4,10 +4,13 @@ Exploratory research on whether extreme rainfall episodes cluster within seasons
 
 ## Current status
 
-This repository contains a **preliminary station-level winter pilot**, not a completed regional storm-tracking study. See [REPORT.md](REPORT.md) for methods, findings, limitations, references, and the plan for future work. The six station records do not identify distinct storms across a region. The rare-event forecast comparison has no positive outcomes in the test period and is inconclusive.
+This repository contains a preliminary station-level pilot and an exploratory five-state gridded episode analysis, not a validated independent-storm catalog. See [REPORT.md](REPORT.md) for methods, findings, limitations, references, and the plan for future work. The six station records do not identify distinct storms across a region. The rare-event forecast comparison has no positive outcomes in the test period and is inconclusive.
+
+The newer regional work and its limitations are documented in [regional/RESULTS.md](regional/RESULTS.md), with [reproduction instructions](regional/README.md).
 
 ## Contents
 
+- `regional/`: gridded event definitions, seasonal summaries, exploratory hindcasts, and source manifest.
 - `analysis.py`: analysis of GHCN-Daily station records and November Niño 3.4 SST.
 - `data/`: gzip-compressed frozen NOAA station observations and checksums.
 - `output/`: pilot result tables, forecast scores, and an exploratory figure.
